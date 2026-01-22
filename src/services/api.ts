@@ -14,4 +14,7 @@ export const fetchMe = () => api.get("/api/me");
 // 👉 logout
 export const logout = () => api.post("/logout");
 
+// 👉 ดึงประเภทข่าวสาร
+export const fetchAnnouncementTypes = () => api.get("/api/announcement-types");
+
 export default api;

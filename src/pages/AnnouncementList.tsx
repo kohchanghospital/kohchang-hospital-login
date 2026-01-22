@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
 import AdminLayout from "../layouts/Layout";
 import { Icons } from "../icons/icons";
+import api, { fetchAnnouncementTypes } from "../services/api";
 
 type User = { id: number; name: string; email: string };
+
+type AnnouncementType = {
+    id: number;
+    name: string;
+};
 
 type Announcement = {
     id: number;
     title: string;
-    type: string;
+    type_id: number;
+    type: AnnouncementType;
     file_path: string;
     created_at: string;
 };
@@ -19,116 +25,65 @@ type Meta = {
     total: number;
 };
 
-const MOCK_ANNOUNCEMENTS = [
-    {
-        id: 1,
-        title: "ประกาศหยุดให้บริการชั่วคราว",
-        type: "news",
-        file_path: "announcements/holiday.pdf",
-        created_at: "2026-01-15T10:30:00",
-    },
-    {
-        id: 2,
-        title: "แนวทางป้องกันไข้หวัดใหญ่",
-        type: "news",
-        file_path: "announcements/flu-guide.pdf",
-        created_at: "2026-01-14T09:00:00",
-    },
-    {
-        id: 3,
-        title: "ประชาสัมพันธ์การฉีดวัคซีนโควิด",
-        type: "news",
-        file_path: "announcements/covid-vaccine.pdf",
-        created_at: "2026-01-13T08:20:00",
-    },
-    {
-        id: 4,
-        title: "ประกาศสอบราคาจัดซื้อเวชภัณฑ์",
-        type: "procurement",
-        file_path: "announcements/medical-supply.pdf",
-        created_at: "2026-01-12T14:45:00",
-    },
-    {
-        id: 5,
-        title: "TOR จัดซื้อรถพยาบาล",
-        type: "procurement",
-        file_path: "announcements/ambulance-tor.pdf",
-        created_at: "2026-01-11T11:10:00",
-    },
-];
-
 type Props = { user: User; onLogout: () => void };
 
 export default function AnnouncementList({ user, onLogout }: Props) {
-    // const [items, setItems] = useState<Announcement[]>([]);
-    const [items, setItems] = useState<Announcement[]>(MOCK_ANNOUNCEMENTS);
+    const [types, setTypes] = useState<AnnouncementType[]>([]);
+    const [items, setItems] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(false);
 
     const [type, setType] = useState("");
+    const [keyword, setKeyword] = useState("");
     const [page, setPage] = useState(1);
-    const [perPage, setPerPage] = useState(5); // 🔥 จำนวนต่อหน้า
+    const [perPage, setPerPage] = useState(10);
 
     const [meta, setMeta] = useState<Meta | null>(null);
-    // const [loading, setLoading] = useState(true);
 
-    // const loadData = async () => {
-    //     setLoading(true);
+    // 🔥 โหลดรายการประกาศจาก API
+    const loadData = async () => {
+        setLoading(true);
 
-    //     const params: any = { page };
-    //     if (type) params.type = type;
+        const params: any = {
+            page,
+            per_page: perPage,
+        };
 
-    //     const res = await api.get("/api/announcements", { params });
+        if (type) params.type_id = type;
+        if (keyword) params.q = keyword;
 
-    //     setItems(res.data.data);   // 🔥 data อยู่ใน data.data
-    //     setMeta({
-    //         current_page: res.data.current_page,
-    //         last_page: res.data.last_page,
-    //         total: res.data.total,
-    //     });
+        try {
+            const res = await api.get("/api/announcements", { params });
 
-    //     setLoading(false);
-    // };
-
-    const loadData = () => {
-        let filtered = MOCK_ANNOUNCEMENTS;
-
-        if (type) {
-            filtered = filtered.filter((i) => i.type === type);
+            setItems(res.data.data);
+            setMeta({
+                current_page: res.data.current_page,
+                last_page: res.data.last_page,
+                total: res.data.total,
+            });
+        } catch (err) {
+            console.error("โหลดประกาศไม่สำเร็จ", err);
         }
-
-        const total = filtered.length;
-        const last_page = Math.ceil(total / perPage);
-        const start = (page - 1) * perPage;
-        const end = start + perPage;
-
-        const paginated = filtered.slice(start, end);
-
-        setItems(paginated);
-        setMeta({
-            current_page: page,
-            last_page,
-            total,
-        });
 
         setLoading(false);
     };
 
+    // 🔥 โหลดประเภท dropdown
     useEffect(() => {
-        setLoading(true);
+        fetchAnnouncementTypes()
+            .then((res) => setTypes(res.data.data))
+            .catch((err) => console.error("โหลดประเภทไม่สำเร็จ", err));
+    }, []);
+
+    // 🔥 โหลดรายการทุกครั้งที่ filter / page เปลี่ยน
+    useEffect(() => {
         loadData();
-    }, [type, page, perPage]); // 🔥 เพิ่ม perPage
-
-
-    // useEffect(() => {
-    //     loadData();
-    // }, [type, page]);
+    }, [type, page, perPage, keyword]);
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>
             <div className="bg-white rounded-xl shadow p-6">
                 <div className="flex justify-between mb-4">
                     <h2 className="text-xl font-bold">ประกาศ</h2>
-
                     <a
                         href="/announcements/upload"
                         className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
@@ -140,43 +95,57 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                 {/* Controls */}
                 <div className="flex justify-between items-center mb-4">
                     {/* Filter */}
-                <div className="mb-4">
-                    <select
-                        className="border rounded-lg px-3 py-2"
-                        value={type}
-                        onChange={(e) => {
-                            setType(e.target.value);
-                            setPage(1); // 🔥 reset หน้าเมื่อเปลี่ยน filter
-                        }}
-                    >
-                        <option value="">ทั้งหมด</option>
-                        <option value="news">ข่าวสาร/ประชาสัมพันธ์</option>
-                        <option value="procurement">จัดซื้อจัดจ้าง</option>
-                    </select>
-                </div>
-                
+                    <div className="flex gap-2">
+                        <select
+                            className="border rounded-lg px-3 py-2"
+                            value={type}
+                            onChange={(e) => {
+                                setType(e.target.value);
+                                setPage(1);
+                            }}
+                        >
+                            <option value="">ทั้งหมด</option>
+                            {types.map((t) => (
+                                <option key={t.id} value={t.id}>
+                                    {t.name}
+                                </option>
+                            ))}
+                        </select>
+                        <input
+                            type="text"
+                            placeholder="ค้นหาหัวข้อ..."
+                            className="border rounded-lg px-3 py-2"
+                            value={keyword}
+                            onChange={(e) => {
+                                setKeyword(e.target.value);
+                                setPage(1);
+                            }}
+                        />
+                    </div>
+
                     <div>
                         <select
                             className="border rounded-lg px-3 py-2"
                             value={perPage}
                             onChange={(e) => {
                                 setPerPage(Number(e.target.value));
-                                setPage(1); // 🔥 reset หน้าเมื่อเปลี่ยน perPage
+                                setPage(1);
                             }}
                         >
-                            <option value={5}>แสดง 5 รายการ</option>
                             <option value={10}>แสดง 10 รายการ</option>
                             <option value={20}>แสดง 20 รายการ</option>
                             <option value={50}>แสดง 50 รายการ</option>
+                            <option value={100}>แสดง 100 รายการ</option>
+                            <option value={9999}>แสดงทั้งหมด</option>
                         </select>
                     </div>
                 </div>
 
                 {/* Table */}
-                {loading && <div className="text-gray-500">กำลังโหลด...</div>}
+                {loading && <div className="text-gray-500 text-center">กำลังโหลด...</div>}
 
                 {!loading && items.length === 0 && (
-                    <div className="text-gray-500">ไม่พบข้อมูล</div>
+                    <div className="text-gray-500 text-center">ไม่พบข้อมูล</div>
                 )}
 
                 {!loading && items.length > 0 && (
@@ -184,22 +153,26 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="border-b">
-                                    <th className="text-left">หัวข้อ</th>
-                                    <th className="text-left">ประเภท</th>
-                                    <th className="text-center">ไฟล์</th>
-                                    <th className="text-center">วันที่</th>
-                                    <th className="text-center">จัดการ</th>
+                                    <th className="text-center max-w-4">ลำดับ</th>
+                                    <th className="text-left py-2">หัวข้อ</th>
+                                    <th className="text-left py-2">ประเภท</th>
+                                    <th className="text-center py-2">ไฟล์</th>
+                                    <th className="text-center py-2">วันที่</th>
+                                    <th className="text-center py-2 w-24">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.map((i) => (
-                                    <tr key={i.id} className="border-b hover:bg-gray-50">
-                                        <td className="text-left">{i.title}</td>
-                                        <td className="text-left">
-                                            {i.type === "news" && "ข่าวสาร/ประชาสัมพันธ์"}
-                                            {i.type === "procurement" && "จัดซื้อจัดจ้าง"}
+                                {items.map((i, index) => (
+                                    <tr
+                                        key={i.id}
+                                        className="border-b hover:bg-gray-50 transition"
+                                    >
+                                        <td className="text-center py-2">
+                                            {(meta?.current_page! - 1) * perPage + index + 1}
                                         </td>
-                                        <td className="text-center">
+                                        <td className="text-left py-2">{i.title}</td>
+                                        <td className="text-left py-2">{i.type?.name}</td>
+                                        <td className="text-center py-2">
                                             <a
                                                 href={`http://localhost:8000/storage/${i.file_path}`}
                                                 target="_blank"
@@ -211,12 +184,21 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                                         <td className="text-center">
                                             {new Date(i.created_at).toLocaleDateString("th-TH")}
                                         </td>
-                                        <td className="text-center">
+                                        <td className="text-center py-2 items-center justify-center flex gap-2">
                                             <a
                                                 href={`/announcements/edit/${i.id}`}
-                                                className="text-red-600 hover:underline"
+                                                className="text-yellow-500 hover:underline"
+                                                title="แก้ไข"
                                             >
-                                                ลบ
+                                                <Icons.Edit />
+                                                
+                                            </a> |{" "}
+                                            <a
+                                                href={`/announcements/deleted/${i.id}`}
+                                                className="text-red-600 hover:underline"
+                                                title="ลบ"
+                                            >
+                                                <Icons.TrashAlt />
                                             </a>
                                         </td>
                                     </tr>
@@ -230,7 +212,6 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                                 <div className="text-sm text-gray-500">
                                     ทั้งหมด {meta.total} รายการ
                                 </div>
-
                                 <div className="flex gap-2">
                                     <button
                                         disabled={meta.current_page === 1}
@@ -239,7 +220,6 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                                     >
                                         <Icons.ChevronLeft />
                                     </button>
-
                                     {Array.from(
                                         { length: meta.last_page },
                                         (_, i) => i + 1
@@ -255,7 +235,6 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                                             {p}
                                         </button>
                                     ))}
-
                                     <button
                                         disabled={meta.current_page === meta.last_page}
                                         onClick={() => setPage(meta.current_page + 1)}

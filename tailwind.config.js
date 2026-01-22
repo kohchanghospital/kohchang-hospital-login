@@ -8,7 +8,7 @@ export default {
     extend: {
       colors: {
         primary: {
-          50:  "#f5f3ff",
+          50: "#f5f3ff",
           100: "#ede9fe",
           200: "#ddd6fe",
           300: "#c4b5fd",
@@ -19,6 +19,9 @@ export default {
           800: "#5b21b6",
           900: "#4c1d95",
         },
+      },
+      fontFamily: {
+        sans: ["Inter", "Noto Sans Thai", "ui-sans-serif", "system-ui"],
       },
     },
   },
