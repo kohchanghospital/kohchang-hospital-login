@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../layouts/Layout";
 import { Icons } from "../icons/icons";
 import api, { fetchAnnouncementTypes } from "../services/api";
+import AnnouncementModal from "../components/AnnouncementModal";
+
 
 type User = { id: number; name: string; email: string };
 
@@ -28,6 +30,10 @@ type Meta = {
 type Props = { user: User; onLogout: () => void };
 
 export default function AnnouncementList({ user, onLogout }: Props) {
+
+    const [showModal, setShowModal] = useState(false);
+    const [editingItem, setEditingItem] = useState<Announcement | null>(null);
+
     const [types, setTypes] = useState<AnnouncementType[]>([]);
     const [items, setItems] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(false);
@@ -84,12 +90,31 @@ export default function AnnouncementList({ user, onLogout }: Props) {
             <div className="bg-white rounded-xl shadow p-6">
                 <div className="flex justify-between mb-4">
                     <h2 className="text-xl font-bold">ประกาศ</h2>
-                    <a
-                        href="/announcements/upload"
+                    <button
+                        onClick={() => setShowModal(true)}
                         className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
                     >
                         + เพิ่มประกาศ
-                    </a>
+                    </button>
+                    {showModal && (
+                        <AnnouncementModal
+                            types={types}
+                            onClose={() => {
+                                setShowModal(false);
+                            }}
+                            onSuccess={() => loadData()}
+                        />
+                    )}
+                    {editingItem && (
+                        <AnnouncementModal
+                            types={types}
+                            initialData={editingItem}
+                            onClose={() => {
+                                setEditingItem(null);
+                            }}
+                            onSuccess={() => loadData()}
+                        />
+                    )}
                 </div>
 
                 {/* Controls */}
@@ -185,14 +210,14 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                                             {new Date(i.created_at).toLocaleDateString("th-TH")}
                                         </td>
                                         <td className="text-center py-2 items-center justify-center flex gap-2">
-                                            <a
-                                                href={`/announcements/edit/${i.id}`}
+                                            <button
+                                                onClick={() => setEditingItem(i)}
                                                 className="text-yellow-500 hover:underline"
                                                 title="แก้ไข"
                                             >
                                                 <Icons.Edit />
-                                                
-                                            </a> |{" "}
+                                            </button>
+                                            |{" "}
                                             <a
                                                 href={`/announcements/deleted/${i.id}`}
                                                 className="text-red-600 hover:underline"
