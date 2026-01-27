@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../layouts/Layout";
-import { Icons } from "../icons/icons";
+import { Icons } from "../icons/Icons";
 import api, { fetchAnnouncementTypes } from "../services/api";
 import AnnouncementModal from "../components/AnnouncementModal";
 

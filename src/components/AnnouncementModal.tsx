@@ -66,7 +66,7 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
             }
 
             if (isEdit) {
-                await api.post(`/api/announcements/${initialData!.id}?_method=PUT`, formData);
+                await api.post(`/announcements/${initialData!.id}?_method=PUT`, formData);
             } else {
                 formData.append("file", file!);
                 await api.post("/api/announcements", formData);

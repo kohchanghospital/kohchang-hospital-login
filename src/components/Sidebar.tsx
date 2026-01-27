@@ -3,10 +3,10 @@ import { NavLink } from "react-router-dom";
 const menuItems = [
     { path: "/dashboard", label: "Dashboard", icon: "🏠" },
     { path: "/calendar", label: "ปฏิทินกิจกรรม", icon: "📅" },
-    { path: "/news", label: "ข่าวสาร", icon: "📰" },
     { path: "/announcements", label: "ประกาศ", icon: "📢" },
     { path: "/cars", label: "แผนการใช้รถ", icon: "🚗" },
     { path: "/settings", label: "ตั้งค่า", icon: "⚙️" },
+    { path: "/history", label: "ประวัติ", icon: "📜" },
 ];
 
 export default function Sidebar() {

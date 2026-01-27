@@ -2,11 +2,9 @@ import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import NewsUpload from "./pages/NewsUpload";
 import { fetchMe, logout } from "./services/api";
-import NewsList from "./pages/NewsList";
 import AnnouncementList from "./pages/AnnouncementList";
-import AnnouncementUpload from "./pages/AnnouncementUpload";
+import History from "./pages/History";
 
 type User = {
   id: number;
@@ -88,28 +86,6 @@ function App() {
       />
 
       <Route
-        path="/news"
-        element={
-          isLoggedIn && user ? (
-            <NewsList user={user} onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/" />
-          )
-        }
-      />
-
-      <Route
-        path="/news/upload"
-        element={
-          isLoggedIn && user ? (
-            <NewsUpload user={user} onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/" />
-          )
-        }
-      />
-
-      <Route
         path="/announcements"
         element={
           isLoggedIn && user ? (
@@ -121,10 +97,10 @@ function App() {
       />
 
       <Route
-        path="/announcements/upload"
+        path="/history"
         element={
           isLoggedIn && user ? (
-            <AnnouncementUpload user={user} onLogout={handleLogout} />
+            <History user={user} onLogout={handleLogout} />
           ) : (
             <Navigate to="/" />
           )

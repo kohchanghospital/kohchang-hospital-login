@@ -8,6 +8,7 @@ const routeNameMap: Record<string, string> = {
     calendar: "ปฏิทินกิจกรรม",
     cars: "แผนการใช้รถ",
     settings: "ตั้งค่า",
+    history: "ประวัติ",
 };
 
 export default function Breadcrumb() {
