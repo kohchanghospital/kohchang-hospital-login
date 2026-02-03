@@ -12,7 +12,7 @@ type ContentItem = {
     body: string;
 };
 
-export default function HistoryForm({ user, onLogout }: Props) {
+export default function NewsForm({ user, onLogout }: Props) {
     const [items, setItems] = useState<ContentItem[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +21,7 @@ export default function HistoryForm({ user, onLogout }: Props) {
         e.preventDefault();
         try {
             setIsSaving(true);
-            await api.put("/api/contents/type/history", {
+            await api.put("/api/contents/type/about", {
                 lang: "th",
                 contents: items,
             });
@@ -35,7 +35,7 @@ export default function HistoryForm({ user, onLogout }: Props) {
 
     useEffect(() => {
         setIsLoading(true);
-        api.get("/api/contents/type/history?lang=th")
+        api.get("/api/contents/type/about?lang=th")
             .then(res => {
                 setItems(res.data);
             })
@@ -47,7 +47,7 @@ export default function HistoryForm({ user, onLogout }: Props) {
     return (
         <AdminLayout user={user} onLogout={onLogout}>
             <div className="bg-white rounded-xl shadow p-6">
-                <div className="text-2xl font-bold">จัดการประวัติ</div>
+                <div className="text-2xl font-bold">วิสัยทัศน์ พันธกิจ ค่านิยม</div>
                 <form onSubmit={handleSubmit} className="mx-auto max-w-5xl">
                     {items.map((item, index) => (
                         <div key={item.content_id} className="mt-8">

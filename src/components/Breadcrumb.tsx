@@ -5,6 +5,7 @@ const routeNameMap: Record<string, string> = {
     news: "ข่าวสาร",
     upload: "อัปโหลด",
     announcements: "ประกาศ",
+    knowledges: "สาระความรู้",
     calendar: "ปฏิทินกิจกรรม",
     cars: "แผนการใช้รถ",
     settings: "ตั้งค่า",

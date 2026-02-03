@@ -4,9 +4,11 @@ const menuItems = [
     { path: "/dashboard", label: "Dashboard", icon: "🏠" },
     { path: "/calendar", label: "ปฏิทินกิจกรรม", icon: "📅" },
     { path: "/announcements", label: "ประกาศ", icon: "📢" },
+    { path: "/knowledges", label: "สาระความรู้", icon: "📚" },
     { path: "/cars", label: "แผนการใช้รถ", icon: "🚗" },
     { path: "/settings", label: "ตั้งค่า", icon: "⚙️" },
     { path: "/history", label: "ประวัติ", icon: "📜" },
+    { path: "/vision", label: "วิสัยทัศน์ พันธกิจ", icon: "🎯" },
 ];
 
 export default function Sidebar() {

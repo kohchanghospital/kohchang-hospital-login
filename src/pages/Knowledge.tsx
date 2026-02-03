@@ -1,22 +1,16 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../layouts/Layout";
 import { Icons } from "../icons/Icons";
-import api, { fetchAnnouncementTypes } from "../services/api";
-import AnnouncementModal from "../components/AnnouncementModal";
+import KnowledgeModal from "../components/KnowledgeModal";
+import api from "../services/api";
 
 
 type User = { id: number; name: string; email: string };
 
-type AnnouncementType = {
-    id: number;
-    name: string;
-};
 
-type Announcement = {
+type Knowledge = {
     id: number;
     title: string;
-    type_id: number;
-    type: AnnouncementType;
     file_path: string;
     created_at: string;
 };
@@ -29,16 +23,14 @@ type Meta = {
 
 type Props = { user: User; onLogout: () => void };
 
-export default function AnnouncementList({ user, onLogout }: Props) {
+export default function Knowledge({ user, onLogout }: Props) {
 
     const [showModal, setShowModal] = useState(false);
-    const [editingItem, setEditingItem] = useState<Announcement | null>(null);
+    const [editingItem, setEditingItem] = useState<Knowledge | null>(null);
 
-    const [types, setTypes] = useState<AnnouncementType[]>([]);
-    const [items, setItems] = useState<Announcement[]>([]);
+    const [items, setItems] = useState<Knowledge[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const [type, setType] = useState("");
     const [keyword, setKeyword] = useState("");
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
@@ -54,11 +46,10 @@ export default function AnnouncementList({ user, onLogout }: Props) {
             per_page: perPage,
         };
 
-        if (type) params.type_id = type;
         if (keyword) params.q = keyword;
 
         try {
-            const res = await api.get("/api/announcements", { params });
+            const res = await api.get("/api/knowledges", { params });
 
             setItems(res.data.data);
             setMeta({
@@ -73,32 +64,24 @@ export default function AnnouncementList({ user, onLogout }: Props) {
         setLoading(false);
     };
 
-    // 🔥 โหลดประเภท dropdown
-    useEffect(() => {
-        fetchAnnouncementTypes()
-            .then((res) => setTypes(res.data.data))
-            .catch((err) => console.error("โหลดประเภทไม่สำเร็จ ‼️", err));
-    }, []);
-
     // 🔥 โหลดรายการทุกครั้งที่ filter / page เปลี่ยน
     useEffect(() => {
         loadData();
-    }, [type, page, perPage, keyword]);
+    }, [page, perPage, keyword]);
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>
             <div className="bg-white rounded-xl shadow p-6">
                 <div className="flex justify-between mb-4">
-                    <h2 className="text-xl font-bold">ประกาศ</h2>
+                    <h2 className="text-xl font-bold">สาระความรู้</h2>
                     <button
                         onClick={() => setShowModal(true)}
                         className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
                     >
-                        + เพิ่มประกาศ
+                        + เพิ่มข้อมูล
                     </button>
                     {showModal && (
-                        <AnnouncementModal
-                            types={types}
+                        <KnowledgeModal
                             onClose={() => {
                                 setShowModal(false);
                             }}
@@ -106,8 +89,7 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                         />
                     )}
                     {editingItem && (
-                        <AnnouncementModal
-                            types={types}
+                        <KnowledgeModal
                             initialData={editingItem}
                             onClose={() => {
                                 setEditingItem(null);
@@ -121,21 +103,6 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                 <div className="flex justify-between items-center mb-4">
                     {/* Filter */}
                     <div className="flex gap-2">
-                        <select
-                            className="border rounded-lg px-3 py-2"
-                            value={type}
-                            onChange={(e) => {
-                                setType(e.target.value);
-                                setPage(1);
-                            }}
-                        >
-                            <option value="">ทั้งหมด</option>
-                            {types.map((t) => (
-                                <option key={t.id} value={t.id}>
-                                    {t.name}
-                                </option>
-                            ))}
-                        </select>
                         <input
                             type="text"
                             placeholder="ค้นหาหัวข้อ..."
@@ -180,7 +147,6 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                                 <tr className="border-b">
                                     <th className="text-center max-w-4">ลำดับ</th>
                                     <th className="text-left py-2">หัวข้อ</th>
-                                    <th className="text-left py-2">ประเภท</th>
                                     <th className="text-center py-2">ไฟล์</th>
                                     <th className="text-center py-2">วันที่</th>
                                     <th className="text-center py-2 w-24">จัดการ</th>
@@ -196,7 +162,6 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                                             {(meta?.current_page! - 1) * perPage + index + 1}
                                         </td>
                                         <td className="text-left py-2">{i.title}</td>
-                                        <td className="text-left py-2">{i.type?.name}</td>
                                         <td className="text-center py-2">
                                             <a
                                                 href={`http://localhost:8000/storage/${i.file_path}`}
@@ -219,7 +184,7 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                                             </button>
                                             |{" "}
                                             <a
-                                                href={`/announcements/deleted/${i.id}`}
+                                                href={`/Knowledges/deleted/${i.id}`}
                                                 className="text-red-600 hover:underline"
                                                 title="ลบ"
                                             >

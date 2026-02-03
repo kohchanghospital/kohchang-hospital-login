@@ -5,6 +5,8 @@ import Dashboard from "./pages/Dashboard";
 import { fetchMe, logout } from "./services/api";
 import AnnouncementList from "./pages/AnnouncementList";
 import History from "./pages/History";
+import Vision from "./pages/Vision";
+import Knowledge from "./pages/Knowledge";
 
 type User = {
   id: number;
@@ -97,10 +99,32 @@ function App() {
       />
 
       <Route
+        path="/knowledges"
+        element={
+          isLoggedIn && user ? (
+            <Knowledge user={user} onLogout={handleLogout} />
+          ) : (
+            <Navigate to="/" />
+          )
+        }
+      />
+
+      <Route
         path="/history"
         element={
           isLoggedIn && user ? (
             <History user={user} onLogout={handleLogout} />
+          ) : (
+            <Navigate to="/" />
+          )
+        }
+      />
+
+      <Route
+        path="/vision"
+        element={
+          isLoggedIn && user ? (
+            <Vision user={user} onLogout={handleLogout} />
           ) : (
             <Navigate to="/" />
           )

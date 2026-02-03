@@ -1,29 +1,22 @@
 import { useRef, useState } from "react";
 import api from "../services/api";
 
-type AnnouncementType = {
-    id: number;
-    name: string;
-};
 
-type Announcement = {
+type Knowledge = {
     id: number;
     title: string;
-    type_id: number;
     file_path?: string;
 };
 
-type AnnouncementModalProps = {
-    types: AnnouncementType[];
-    initialData?: Announcement;
+type KnowledgeModalProps = {
+    initialData?: Knowledge;
     onClose: () => void;
     onSuccess: () => void;
 };
 
-export default function AnnouncementModal({ types, onClose, initialData, onSuccess }: AnnouncementModalProps) {
+export default function KnowledgeModal({ onClose, initialData, onSuccess }: KnowledgeModalProps) {
     const [file, setFile] = useState<File | null>(null);
     const [title, setTitle] = useState(initialData?.title || "");
-    const [type, setType] = useState(initialData?.type_id?.toString() || "");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
@@ -43,11 +36,6 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!title || !type) {
-            setMessage("กรุณากรอกข้อมูลให้ครบ");
-            return;
-        }
-
         if (!isEdit && !file) {
             setMessage("กรุณาเลือกไฟล์ PDF");
             return;
@@ -59,17 +47,16 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
         try {
             const formData = new FormData();
             formData.append("title", title);
-            formData.append("type_id", type);
 
             if (file) {
                 formData.append("file", file);
             }
 
             if (isEdit) {
-                await api.post(`/api/announcements/${initialData!.id}?_method=PUT`, formData);
+                await api.post(`/api/knowledges/${initialData!.id}?_method=PUT`, formData);
             } else {
                 formData.append("file", file!);
-                await api.post("/api/announcements", formData);
+                await api.post("/api/knowledges", formData);
             }
 
             setMessage(isEdit ? "อัปเดตสำเร็จ 🎉" : "อัปโหลดสำเร็จ 🎉");
@@ -79,7 +66,7 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
                 onClose();
             }, 1000);
         } catch (err: any) {
-            setMessage(err.response?.data?.message || "บันทึกไม่สำเร็จ ‼");
+            setMessage(err.response?.data?.message || "บันทึกไม่สำเร็จ ‼️");
         } finally {
             setLoading(false);
         }
@@ -114,9 +101,8 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
                     ✕
                 </button>
 
-                {/* <h3 className="text-lg font-bold mb-4">อัปโหลดประกาศ (PDF)</h3> */}
                 <h3 className="text-lg font-bold mb-4">
-                    {isEdit ? "แก้ไขประกาศ" : "อัปโหลดประกาศ (PDF)"}
+                    {isEdit ? "แก้ไขสาระความรู้" : "อัปโหลดสาระความรู้ (PDF)"}
                 </h3>
 
                 {message && <div className="mb-3 text-sm text-red-500">{message}</div>}
@@ -130,20 +116,6 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
                         onChange={(e) => setTitle(e.target.value)}
                         required
                     />
-
-                    <select
-                        className="w-full border rounded px-3 py-2"
-                        value={type}
-                        onChange={(e) => setType(e.target.value)}
-                        required
-                    >
-                        <option value="">-- เลือกประเภท --</option>
-                        {types.map((t) => (
-                            <option key={t.id} value={t.id}>
-                                {t.name}
-                            </option>
-                        ))}
-                    </select>
 
                     <div>
                         <input
