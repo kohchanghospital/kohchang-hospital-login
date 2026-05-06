@@ -10,6 +10,10 @@ const routeNameMap: Record<string, string> = {
     cars: "แผนการใช้รถ",
     settings: "ตั้งค่า",
     history: "ประวัติ",
+    management: "คณะผู้บริหาร",
+    vision: "วิสัยทัศน์ พันธกิจ",
+    donation: "สมทบทุน",
+    organ: "บริจากอวัยวะ",
 };
 
 export default function Breadcrumb() {

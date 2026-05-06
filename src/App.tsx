@@ -7,6 +7,9 @@ import AnnouncementList from "./pages/AnnouncementList";
 import History from "./pages/History";
 import Vision from "./pages/Vision";
 import Knowledge from "./pages/Knowledge";
+import Donation from "./pages/Donation";
+import Management from "./pages/Management";
+import { Toaster } from "react-hot-toast";
 
 type User = {
   id: number;
@@ -62,78 +65,122 @@ function App() {
   }
 
   return (
-    <Routes>
-      {/* หน้า Login */}
-      <Route
-        path="/"
-        element={
-          isLoggedIn ? (
-            <Navigate to="/dashboard" />
-          ) : (
-            <Login onLoginSuccess={() => setIsLoggedIn(true)} />
-          )
-        }
-      />
+    <>
+      <Toaster position="top-right"
+        toastOptions={{
+          duration: 2000,
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        }} />
+      <Routes>
+        {/* หน้า Login */}
+        <Route
+          path="/"
+          element={
+            isLoggedIn ? (
+              <Navigate to="/dashboard" />
+            ) : (
+              <Login onLoginSuccess={() => setIsLoggedIn(true)} />
+            )
+          }
+        />
 
-      {/* Protected Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          isLoggedIn && user ? (
-            <Dashboard user={user} onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/" />
-          )
-        }
-      />
+        {/* Protected Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            isLoggedIn && user ? (
+              <Dashboard user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
 
-      <Route
-        path="/announcements"
-        element={
-          isLoggedIn && user ? (
-            <AnnouncementList user={user} onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/" />
-          )
-        }
-      />
+        <Route
+          path="/announcements"
+          element={
+            isLoggedIn && user ? (
+              <AnnouncementList user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
 
-      <Route
-        path="/knowledges"
-        element={
-          isLoggedIn && user ? (
-            <Knowledge user={user} onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/" />
-          )
-        }
-      />
+        <Route
+          path="/knowledges"
+          element={
+            isLoggedIn && user ? (
+              <Knowledge user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
 
-      <Route
-        path="/history"
-        element={
-          isLoggedIn && user ? (
-            <History user={user} onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/" />
-          )
-        }
-      />
+        <Route
+          path="/setting"
+          element={
+            isLoggedIn && user ? (
+              <Dashboard user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
 
-      <Route
-        path="/vision"
-        element={
-          isLoggedIn && user ? (
-            <Vision user={user} onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/" />
-          )
-        }
-      />
+        <Route
+          path="/history"
+          element={
+            isLoggedIn && user ? (
+              <History user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
 
-      {/* fallback */}
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+        <Route
+          path="/management"
+          element={
+            isLoggedIn && user ? (
+              <Management user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        <Route
+          path="/vision"
+          element={
+            isLoggedIn && user ? (
+              <Vision user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        <Route
+          path="/donation"
+          element={
+            isLoggedIn && user ? (
+              <Donation user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        {/* fallback */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </>
   );
 }
 
