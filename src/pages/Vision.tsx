@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 import api from "../services/api";
 import AdminLayout from "../layouts/Layout";
+import { EditorPageSkeleton } from "../components/SkeletonScreens";
 
 type User = { id: number; name: string; email: string };
 type Props = { user: User; onLogout: () => void };
@@ -39,10 +40,21 @@ export default function NewsForm({ user, onLogout }: Props) {
             .then(res => {
                 setItems(res.data);
             })
+            .catch(error => {
+                console.error("Load vision content failed", error);
+            })
             .finally(() => {
                 setIsLoading(false);
             });
     }, []);
+
+    if (isLoading) {
+        return (
+            <AdminLayout user={user} onLogout={onLogout}>
+                <EditorPageSkeleton />
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>
@@ -89,10 +101,6 @@ export default function NewsForm({ user, onLogout }: Props) {
                             />
                         </div>
                     ))}
-
-                    {isLoading && (
-                        <div className="text-gray-500 text-center">กำลังโหลด...</div>
-                    )}
 
                     <div className="flex justify-center">
                         <button

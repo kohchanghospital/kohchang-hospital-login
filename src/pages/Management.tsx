@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { DndContext, closestCenter, } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy, useSortable, } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { ManagementPageSkeleton } from "../components/SkeletonScreens";
 
 type User = { id: number; name: string; email: string };
 type Props = { user: User; onLogout: () => void };
@@ -64,24 +65,38 @@ export default function ManagementForm({ user, onLogout }: Props) {
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editingValue, setEditingValue] = useState("");
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+    const [executivesLoaded, setExecutivesLoaded] = useState(false);
+    const [departmentsLoaded, setDepartmentsLoaded] = useState(false);
 
     // โหลดข้อมูล
-    const fetchData = async () => {
-        const res = await api.get("/api/executives");
-        setList(res.data);
+    const fetchData = async (markLoaded = false) => {
+        try {
+            const res = await api.get("/api/executives");
+            setList(res.data);
+        } catch (err) {
+            console.error("Load executives failed", err);
+        } finally {
+            if (markLoaded) setExecutivesLoaded(true);
+        }
     };
 
     useEffect(() => {
-        fetchData();
+        fetchData(true);
     }, []);
 
-    const fetchDepartments = async () => {
-        const res = await api.get("/api/departments");
-        setDepartments(res.data);
+    const fetchDepartments = async (markLoaded = false) => {
+        try {
+            const res = await api.get("/api/departments");
+            setDepartments(res.data);
+        } catch (err) {
+            console.error("Load departments failed", err);
+        } finally {
+            if (markLoaded) setDepartmentsLoaded(true);
+        }
     };
 
     useEffect(() => {
-        fetchDepartments();
+        fetchDepartments(true);
     }, []);
 
     const grouped = list.reduce((acc: any, item) => {
@@ -139,7 +154,7 @@ export default function ManagementForm({ user, onLogout }: Props) {
         }
     };
 
-    const fileRef = useRef(null);
+    const fileRef = useRef<HTMLInputElement | null>(null);
 
     // submit
     const handleSubmit = async (e: any) => {
@@ -247,6 +262,14 @@ export default function ManagementForm({ user, onLogout }: Props) {
             toast.success("จัดลำดับสำเร็จ 🔥");
         }
     };
+
+    if (!executivesLoaded || !departmentsLoaded) {
+        return (
+            <AdminLayout user={user} onLogout={onLogout}>
+                <ManagementPageSkeleton />
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>

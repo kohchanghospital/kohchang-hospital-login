@@ -3,6 +3,7 @@ import AdminLayout from "../layouts/Layout";
 import { Icons } from "../icons/Icons";
 import api, { fetchAnnouncementTypes } from "../services/api";
 import AnnouncementModal from "../components/AnnouncementModal";
+import { TablePageSkeleton, TableRowsSkeleton } from "../components/SkeletonScreens";
 
 
 type User = { id: number; name: string; email: string };
@@ -36,7 +37,9 @@ export default function AnnouncementList({ user, onLogout }: Props) {
 
     const [types, setTypes] = useState<AnnouncementType[]>([]);
     const [items, setItems] = useState<Announcement[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [typesLoaded, setTypesLoaded] = useState(false);
+    const [itemsLoaded, setItemsLoaded] = useState(false);
 
     const [type, setType] = useState("");
     const [keyword, setKeyword] = useState("");
@@ -71,19 +74,29 @@ export default function AnnouncementList({ user, onLogout }: Props) {
         }
 
         setLoading(false);
+        setItemsLoaded(true);
     };
 
     // 🔥 โหลดประเภท dropdown
     useEffect(() => {
         fetchAnnouncementTypes()
             .then((res) => setTypes(res.data.data))
-            .catch((err) => console.error("โหลดประเภทไม่สำเร็จ ‼️", err));
+            .catch((err) => console.error("โหลดประเภทไม่สำเร็จ ‼️", err))
+            .finally(() => setTypesLoaded(true));
     }, []);
 
     // 🔥 โหลดรายการทุกครั้งที่ filter / page เปลี่ยน
     useEffect(() => {
         loadData();
     }, [type, page, perPage, keyword]);
+
+    if (!typesLoaded || !itemsLoaded) {
+        return (
+            <AdminLayout user={user} onLogout={onLogout}>
+                <TablePageSkeleton columns={6} filters={2} />
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>
@@ -167,7 +180,7 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                 </div>
 
                 {/* Table */}
-                {loading && <div className="text-gray-500 text-center">กำลังโหลด...</div>}
+                {loading && <TableRowsSkeleton columns={6} rows={5} />}
 
                 {!loading && items.length === 0 && (
                     <div className="text-gray-500 text-center">ไม่พบข้อมูล</div>

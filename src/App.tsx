@@ -10,6 +10,7 @@ import Knowledge from "./pages/Knowledge";
 import Donation from "./pages/Donation";
 import Management from "./pages/Management";
 import { Toaster } from "react-hot-toast";
+import { AdminShellSkeleton } from "./components/SkeletonScreens";
 
 type User = {
   id: number;
@@ -18,11 +19,10 @@ type User = {
 };
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    localStorage.getItem("isLoggedIn") === "true"
-  );
+  const isInitiallyLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const [isLoggedIn, setIsLoggedIn] = useState(isInitiallyLoggedIn);
   const [user, setUser] = useState<User | null>(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [checkingAuth, setCheckingAuth] = useState(isInitiallyLoggedIn);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,6 +30,8 @@ function App() {
         setCheckingAuth(false);
         return;
       }
+
+      setCheckingAuth(true);
 
       try {
         const res = await fetchMe();
@@ -57,11 +59,7 @@ function App() {
   };
 
   if (checkingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
-        กำลังตรวจสอบสิทธิ์...
-      </div>
-    );
+    return <AdminShellSkeleton />;
   }
 
   return (

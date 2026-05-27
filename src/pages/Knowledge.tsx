@@ -3,6 +3,7 @@ import AdminLayout from "../layouts/Layout";
 import { Icons } from "../icons/Icons";
 import KnowledgeModal from "../components/KnowledgeModal";
 import api from "../services/api";
+import { TablePageSkeleton, TableRowsSkeleton } from "../components/SkeletonScreens";
 
 
 type User = { id: number; name: string; email: string };
@@ -29,7 +30,8 @@ export default function Knowledge({ user, onLogout }: Props) {
     const [editingItem, setEditingItem] = useState<Knowledge | null>(null);
 
     const [items, setItems] = useState<Knowledge[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [itemsLoaded, setItemsLoaded] = useState(false);
 
     const [keyword, setKeyword] = useState("");
     const [page, setPage] = useState(1);
@@ -62,12 +64,21 @@ export default function Knowledge({ user, onLogout }: Props) {
         }
 
         setLoading(false);
+        setItemsLoaded(true);
     };
 
     // 🔥 โหลดรายการทุกครั้งที่ filter / page เปลี่ยน
     useEffect(() => {
         loadData();
     }, [page, perPage, keyword]);
+
+    if (!itemsLoaded) {
+        return (
+            <AdminLayout user={user} onLogout={onLogout}>
+                <TablePageSkeleton columns={5} filters={1} />
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>
@@ -134,7 +145,7 @@ export default function Knowledge({ user, onLogout }: Props) {
                 </div>
 
                 {/* Table */}
-                {loading && <div className="text-gray-500 text-center">กำลังโหลด...</div>}
+                {loading && <TableRowsSkeleton columns={5} rows={5} />}
 
                 {!loading && items.length === 0 && (
                     <div className="text-gray-500 text-center">ไม่พบข้อมูล</div>
