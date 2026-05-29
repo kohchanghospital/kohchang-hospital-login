@@ -100,12 +100,12 @@ export default function AnnouncementList({ user, onLogout }: Props) {
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>
-            <div className="bg-white rounded-xl shadow p-6">
-                <div className="flex justify-between mb-4">
-                    <h2 className="text-xl font-bold">ประกาศ</h2>
+            <div className="page-surface page-pad">
+                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 className="text-xl font-bold text-slate-900">ประกาศ</h2>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
+                        className="btn-primary"
                     >
                         + เพิ่มประกาศ
                     </button>
@@ -131,11 +131,11 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                 </div>
 
                 {/* Controls */}
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     {/* Filter */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row">
                         <select
-                            className="border rounded-lg px-3 py-2"
+                            className="w-full sm:w-44"
                             value={type}
                             onChange={(e) => {
                                 setType(e.target.value);
@@ -152,7 +152,7 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                         <input
                             type="text"
                             placeholder="ค้นหาหัวข้อ..."
-                            className="border rounded-lg px-3 py-2"
+                            className="w-full sm:w-64"
                             value={keyword}
                             onChange={(e) => {
                                 setKeyword(e.target.value);
@@ -163,7 +163,7 @@ export default function AnnouncementList({ user, onLogout }: Props) {
 
                     <div>
                         <select
-                            className="border rounded-lg px-3 py-2"
+                            className="w-full sm:w-48"
                             value={perPage}
                             onChange={(e) => {
                                 setPerPage(Number(e.target.value));
@@ -188,6 +188,7 @@ export default function AnnouncementList({ user, onLogout }: Props) {
 
                 {!loading && items.length > 0 && (
                     <>
+                        <div className="table-wrap">
                         <table className="w-full border-collapse">
                             <thead>
                                 <tr className="border-b">
@@ -243,14 +244,15 @@ export default function AnnouncementList({ user, onLogout }: Props) {
                                 ))}
                             </tbody>
                         </table>
+                        </div>
 
                         {/* Pagination */}
                         {meta && (
-                            <div className="flex justify-between items-center mt-4">
+                            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="text-sm text-gray-500">
                                     ทั้งหมด {meta.total} รายการ
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap gap-2">
                                     <button
                                         disabled={meta.current_page === 1}
                                         onClick={() => setPage(meta.current_page - 1)}

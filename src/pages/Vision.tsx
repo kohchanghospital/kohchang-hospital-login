@@ -27,7 +27,7 @@ export default function NewsForm({ user, onLogout }: Props) {
                 contents: items,
             });
             alert("บันทึกเรียบร้อย");
-        } catch (error) {
+        } catch {
             alert("เกิดข้อผิดพลาดในการบันทึก");
         } finally {
             setIsSaving(false);
@@ -58,12 +58,12 @@ export default function NewsForm({ user, onLogout }: Props) {
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>
-            <div className="bg-white rounded-xl shadow p-6">
-                <div className="text-2xl font-bold">วิสัยทัศน์ พันธกิจ ค่านิยม</div>
+            <div className="page-surface page-pad">
+                <div className="text-2xl font-bold text-slate-900">วิสัยทัศน์ พันธกิจ ค่านิยม</div>
                 <form onSubmit={handleSubmit} className="mx-auto max-w-5xl">
                     {items.map((item, index) => (
-                        <div key={item.content_id} className="mt-8">
-                            <h3 className="text-xl font-bold pb-2">{item.title}</h3>
+                        <div key={item.content_id} className="mt-8 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                            <h3 className="pb-3 text-lg font-bold text-slate-800">{item.title}</h3>
                             <Editor
                                 apiKey="cnb5mdtyf8l00ctwv9buaks8gkm1n81d8og9f9fvzixzqu99"
                                 value={item.body}
@@ -106,7 +106,7 @@ export default function NewsForm({ user, onLogout }: Props) {
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className={`mt-8 mb-3 px-4 py-2 rounded text-white 
+                            className={`mt-8 mb-3 btn-primary 
                                     ${isSaving
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "bg-primary-600 hover:bg-primary-700"}`}

@@ -7,3 +7,68 @@
 body {
   @apply font-sans;
 }
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-slate-50 text-slate-800;
+    background:
+      radial-gradient(circle at top left, rgba(14, 116, 144, 0.12), transparent 32rem),
+      linear-gradient(135deg, #f8fafc 0%, #eef7f8 48%, #f8fafc 100%);
+  }
+
+  * {
+    @apply outline-primary-500/40;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply min-h-10 rounded-xl border border-slate-200 bg-white/90 px-3 text-slate-800 shadow-sm transition duration-200 placeholder:text-slate-400 focus:border-primary-400 focus:ring-4 focus:ring-primary-100;
+  }
+
+  table {
+    @apply text-sm;
+  }
+
+  thead tr {
+    @apply bg-slate-50 text-xs uppercase tracking-wide text-slate-500;
+  }
+
+  tbody tr {
+    @apply transition duration-200;
+  }
+
+  tbody tr:hover {
+    @apply bg-primary-50/50;
+  }
+}
+
+@layer components {
+  .page-surface {
+    @apply rounded-2xl border border-white/70 bg-white/90 shadow-soft backdrop-blur;
+  }
+
+  .page-pad {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-2 font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-lg disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-muted {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md;
+  }
+
+  .icon-button {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-xl transition duration-200 hover:-translate-y-0.5 hover:bg-slate-100;
+  }
+
+  .table-wrap {
+    @apply w-full overflow-x-auto rounded-2xl border border-slate-100;
+  }
+}

@@ -60,18 +60,18 @@ export default function Donation({ user, onLogout }: Props) {
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>
-            <div className="bg-white rounded-xl shadow p-6">
+            <div className="page-surface page-pad">
 
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-slate-900">
                     จัดการหน้าสมทบทุน
                 </div>
 
                 <form onSubmit={handleSubmit} className="mx-auto max-w-5xl">
 
                     {items.map((item, index) => (
-                        <div key={item.content_id} className="mt-8">
+                        <div key={item.content_id} className="mt-8 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
 
-                            <h3 className="text-xl font-bold pb-2">
+                            <h3 className="pb-3 text-lg font-bold text-slate-800">
                                 {item.title}
                             </h3>
 
@@ -107,7 +107,7 @@ export default function Donation({ user, onLogout }: Props) {
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className={`mt-8 px-6 py-2 rounded text-white 
+                            className={`mt-8 btn-primary 
                             ${isSaving
                                     ? "bg-gray-400"
                                     : "bg-primary-600 hover:bg-primary-700"}`}

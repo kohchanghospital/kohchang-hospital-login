@@ -78,8 +78,12 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
                 onSuccess();
                 onClose();
             }, 1000);
-        } catch (err: any) {
-            setMessage(err.response?.data?.message || "บันทึกไม่สำเร็จ ‼");
+        } catch (err: unknown) {
+            const message = err && typeof err === "object" && "response" in err
+                ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+                : undefined;
+
+            setMessage(message || "บันทึกไม่สำเร็จ ‼");
         } finally {
             setLoading(false);
         }
@@ -105,34 +109,34 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm">
+            <div className="page-surface relative max-h-[90vh] w-full max-w-2xl overflow-y-auto p-5 sm:p-6">
                 <button
                     onClick={onClose}
-                    className="absolute top-3 right-3 text-gray-400 hover:text-red-600"
+                    className="icon-button absolute right-3 top-3 text-slate-400 hover:text-red-600"
                 >
                     ✕
                 </button>
 
                 {/* <h3 className="text-lg font-bold mb-4">อัปโหลดประกาศ (PDF)</h3> */}
-                <h3 className="text-lg font-bold mb-4">
+                <h3 className="mb-4 text-lg font-bold text-slate-900">
                     {isEdit ? "แก้ไขประกาศ" : "อัปโหลดประกาศ (PDF)"}
                 </h3>
 
-                {message && <div className="mb-3 text-sm text-red-500">{message}</div>}
+                {message && <div className="mb-3 rounded-2xl bg-red-50 p-3 text-sm text-red-600">{message}</div>}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <input
                         type="text"
                         placeholder="หัวข้อ"
-                        className="w-full border rounded px-3 py-2"
+                        className="w-full"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         required
                     />
 
                     <select
-                        className="w-full border rounded px-3 py-2"
+                        className="w-full"
                         value={type}
                         onChange={(e) => setType(e.target.value)}
                         required
@@ -201,14 +205,14 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 border rounded hover:bg-gray-100"
+                            className="btn-muted"
                         >
                             ยกเลิก
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
+                            className="btn-primary"
                         >
                             {loading ? "กำลังบันทึก..." : isEdit ? "บันทึกการแก้ไข" : "อัปโหลด"}
                         </button>

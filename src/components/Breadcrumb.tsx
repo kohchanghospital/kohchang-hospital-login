@@ -23,12 +23,12 @@ export default function Breadcrumb() {
         .filter(Boolean);
 
     return (
-        <nav className="text-base text-gray-500 mb-4">
-            <ol className="flex items-center space-x-2">
+        <nav className="text-sm text-slate-500">
+            <ol className="flex min-w-0 flex-wrap items-center gap-2">
                 <li>
                     <Link
                         to="/dashboard"
-                        className="hover:text-primary-600 transition"
+                        className="font-semibold text-slate-700 transition hover:text-primary-700"
                     >
                         Home
                     </Link>
@@ -44,18 +44,18 @@ export default function Breadcrumb() {
                     return (
                         <li
                             key={to}
-                            className="flex items-center space-x-2"
+                            className="flex min-w-0 items-center gap-2"
                         >
-                            <span>/</span>
+                            <span className="text-slate-300">/</span>
 
                             {isLast ? (
-                                <span className="text-gray-700 font-medium">
+                                <span className="truncate font-semibold text-primary-800">
                                     {label}
                                 </span>
                             ) : (
                                 <Link
                                     to={to}
-                                    className="hover:text-primary-600 transition"
+                                    className="truncate transition hover:text-primary-700"
                                 >
                                     {label}
                                 </Link>

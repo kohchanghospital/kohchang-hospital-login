@@ -8,11 +8,11 @@ type TableSkeletonProps = {
 
 export function AdminShellSkeleton() {
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen">
             <Sidebar />
 
-            <main className="ml-64 min-h-screen p-8">
-                <div className="flex justify-between items-center mb-6 animate-pulse">
+            <main className="min-h-screen p-4 lg:ml-72 lg:p-8">
+                <div className="mb-6 flex items-center justify-between rounded-3xl border border-white/70 bg-white/85 px-4 py-3 shadow-soft animate-pulse">
                     <div className="h-8 w-48 rounded bg-gray-200" />
                     <div className="h-12 w-44 rounded-full bg-gray-200" />
                 </div>
@@ -29,14 +29,14 @@ export function TablePageSkeleton({
     filters = 2,
 }: TableSkeletonProps) {
     return (
-        <div className="bg-white rounded-xl shadow p-6 animate-pulse">
+        <div className="page-surface page-pad animate-pulse">
             <div className="flex justify-between mb-4">
                 <div className="h-7 w-48 rounded bg-gray-200" />
                 <div className="h-10 w-36 rounded-lg bg-gray-200" />
             </div>
 
-            <div className="flex justify-between items-center mb-4">
-                <div className="flex gap-2">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row">
                     {Array.from({ length: filters }).map((_, index) => (
                         <div key={index} className="h-10 w-40 rounded-lg bg-gray-100" />
                     ))}
@@ -89,7 +89,7 @@ export function TableRowsSkeleton({ columns = 5, rows = 6 }: TableSkeletonProps)
 
 export function EditorPageSkeleton({ sections = 2 }: { sections?: number }) {
     return (
-        <div className="bg-white rounded-xl shadow p-6 animate-pulse">
+        <div className="page-surface page-pad animate-pulse">
             <div className="h-8 w-80 rounded bg-gray-200" />
 
             <div className="mx-auto max-w-5xl">
@@ -113,10 +113,10 @@ export function ManagementPageSkeleton() {
     const skeletonRows = Array.from({ length: 5 });
 
     return (
-        <div className="p-6 animate-pulse">
+        <div className="animate-pulse">
             <div className="h-8 w-56 rounded bg-gray-200 mb-4" />
 
-            <div className="bg-white p-6 rounded-2xl shadow mb-6 grid grid-cols-2 gap-4">
+            <div className="page-surface mb-6 grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-6">
                 <div>
                     <div className="h-5 w-20 rounded bg-gray-200 mb-2" />
                     <div className="h-10 rounded bg-gray-100 border border-gray-100" />
@@ -141,7 +141,7 @@ export function ManagementPageSkeleton() {
                 <div className="col-span-2 h-10 w-24 rounded bg-gray-200" />
             </div>
 
-            <div className="bg-white rounded-2xl shadow p-4">
+            <div className="page-surface p-4">
                 <div className="grid grid-cols-[10rem_1fr_1fr_1fr_6rem_6rem] gap-4 border-b pb-3">
                     {Array.from({ length: 6 }).map((_, index) => (
                         <div key={index} className="h-5 rounded bg-gray-200" />

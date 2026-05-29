@@ -51,7 +51,9 @@ function App() {
   const handleLogout = async () => {
     try {
       await logout();
-    } catch { }
+    } catch {
+      // Logout should still clear local session state if the server is unavailable.
+    }
 
     localStorage.removeItem("isLoggedIn");
     setIsLoggedIn(false);
