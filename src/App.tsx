@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import { fetchMe, logout } from "./services/api";
+import Activity from "./pages/Activity";
 import AnnouncementList from "./pages/AnnouncementList";
 import History from "./pages/History";
 import Vision from "./pages/Vision";
@@ -11,6 +12,7 @@ import Donation from "./pages/Donation";
 import Management from "./pages/Management";
 import { Toaster } from "react-hot-toast";
 import { AdminShellSkeleton } from "./components/SkeletonScreens";
+import Car from "./pages/Car";
 
 type User = {
   id: number;
@@ -101,6 +103,17 @@ function App() {
         />
 
         <Route
+          path="/activity"
+          element={
+            isLoggedIn && user ? (
+              <Activity user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        <Route
           path="/announcements"
           element={
             isLoggedIn && user ? (
@@ -116,6 +129,17 @@ function App() {
           element={
             isLoggedIn && user ? (
               <Knowledge user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        <Route
+          path="/car"
+          element={
+            isLoggedIn && user ? (
+              <Car user={user} onLogout={handleLogout} />
             ) : (
               <Navigate to="/" />
             )

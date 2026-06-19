@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import api from "../services/api";
 
 type AnnouncementType = {
@@ -108,8 +109,8 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
         setMessage("");
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
             <div className="page-surface relative max-h-[90vh] w-full max-w-2xl overflow-y-auto p-5 sm:p-6">
                 <button
                     onClick={onClose}
@@ -118,10 +119,11 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
                     ✕
                 </button>
 
-                {/* <h3 className="text-lg font-bold mb-4">อัปโหลดประกาศ (PDF)</h3> */}
-                <h3 className="mb-4 text-lg font-bold text-slate-900">
-                    {isEdit ? "แก้ไขประกาศ" : "อัปโหลดประกาศ (PDF)"}
-                </h3>
+                <div className="mb-5 border-b border-slate-100 pb-4 pr-10">
+                    <h3 className="mt-1 text-xl font-bold text-slate-950">
+                        {isEdit ? "แก้ไขประกาศ" : "อัปโหลดประกาศ (PDF)"}
+                    </h3>
+                </div>
 
                 {message && <div className="mb-3 rounded-2xl bg-red-50 p-3 text-sm text-red-600">{message}</div>}
 
@@ -219,6 +221,7 @@ export default function AnnouncementModal({ types, onClose, initialData, onSucce
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -3,7 +3,9 @@ import {
     FaChevronRight,
     FaEdit,
     FaTrashAlt,
-    FaPlusCircle
+    FaPlusCircle,
+    FaTimes,
+    FaMinus,
 } from "react-icons/fa";
 
 import { 
@@ -17,5 +19,7 @@ export const Icons = {
     Edit: FaEdit,
     TrashAlt: FaTrashAlt,
     Close: IoClose,
-    PlusCircle: FaPlusCircle
+    PlusCircle: FaPlusCircle,
+    Minus: FaMinus,
+    Times: FaTimes,
 };

@@ -1,10 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 
 const routeNameMap: Record<string, string> = {
+    admin: "Admin",
     dashboard: "Dashboard",
     news: "ข่าวสาร",
     upload: "อัปโหลด",
     announcements: "ประกาศ",
+    activity: "กิจกรรม",
     knowledges: "สาระความรู้",
     calendar: "ปฏิทินกิจกรรม",
     cars: "แผนการใช้รถ",

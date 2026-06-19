@@ -40,37 +40,10 @@ export default function Login({ onLoginSuccess }: Props) {
 
     return (
         <div className="flex min-h-screen items-center justify-center px-4 py-10">
-            <div className="grid w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/70 bg-white/85 shadow-lift backdrop-blur lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="hidden min-h-[34rem] flex-col justify-between bg-slate-950 p-10 text-white lg:flex">
-                    <div>
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-500 shadow-lg shadow-primary-950/40">
-                            <FaHospital className="text-2xl" />
-                        </div>
-                        <h1 className="mt-8 text-4xl font-bold leading-tight">
-                            Kohchang Hospital
-                        </h1>
-                        <p className="mt-4 max-w-sm text-sm leading-7 text-slate-300">
-                            ระบบจัดการข้อมูลเว็บไซต์โรงพยาบาลสำหรับทีมงานภายใน ออกแบบให้ใช้ง่าย ชัดเจน และพร้อมทำงานทุกหน้าจอ
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className="rounded-2xl bg-white/10 p-4">
-                            <div className="text-2xl font-bold text-primary-200">24/7</div>
-                            <div className="mt-1 text-slate-300">พร้อมใช้งาน</div>
-                        </div>
-                        <div className="rounded-2xl bg-white/10 p-4">
-                            <div className="text-2xl font-bold text-accent-100">Secure</div>
-                            <div className="mt-1 text-slate-300">สำหรับผู้ดูแล</div>
-                        </div>
-                    </div>
-                </div>
-
+            <div className="grid w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/70 bg-white/85 shadow-lift backdrop-blur lg:grid-cols-[7%_93%]">
+                <div className="hidden min-h-[34rem] flex-col justify-between bg-slate-950 text-white lg:flex"></div>
                 <div className="p-6 sm:p-10">
-                    <div className="mb-8 lg:hidden">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-600 text-white">
-                            <FaHospital />
-                        </div>
+                    <div className="mb-8">
                         <h1 className="mt-4 text-2xl font-bold text-slate-900">
                             Kohchang Hospital
                         </h1>

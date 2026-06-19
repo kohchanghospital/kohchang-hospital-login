@@ -17,10 +17,10 @@ import {
 
 const menuItems = [
     { path: "/dashboard", label: "Dashboard", icon: FaHome },
-    { path: "/calendar", label: "ปฏิทินกิจกรรม", icon: FaCalendarAlt },
+    { path: "/activity", label: "ปฏิทินกิจกรรม", icon: FaCalendarAlt },
     { path: "/announcements", label: "ประกาศ", icon: FaBell },
     { path: "/knowledges", label: "สาระความรู้", icon: FaBookOpen },
-    { path: "/cars", label: "แผนการใช้รถ", icon: FaCarSide },
+    { path: "/car", label: "แผนการใช้รถ", icon: FaCarSide },
     { path: "/settings", label: "ตั้งค่า", icon: FaCog },
     { path: "/history", label: "ประวัติ", icon: FaScroll },
     { path: "/management", label: "คณะผู้บริหาร", icon: FaUserTie },
@@ -95,15 +95,6 @@ export default function Sidebar({ open = false, onClose }: Props) {
                         );
                     })}
                 </nav>
-
-                <div className="border-t border-white/10 p-4">
-                    <div className="rounded-2xl bg-white/10 p-4 text-sm text-slate-200">
-                        <div className="font-semibold text-white">KCH Portal</div>
-                        <div className="mt-1 text-xs leading-5 text-slate-300">
-                            จัดการข้อมูลเว็บไซต์โรงพยาบาลอย่างรวดเร็วและปลอดภัย
-                        </div>
-                    </div>
-                </div>
             </aside>
         </>
     );

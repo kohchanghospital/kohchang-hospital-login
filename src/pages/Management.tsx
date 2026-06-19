@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import api from "../services/api";
 import { Icons } from "../icons/Icons";
 import AdminLayout from "../layouts/Layout";
@@ -534,6 +535,7 @@ export default function ManagementForm({ user, onLogout }: Props) {
                             <input
                                 type="checkbox"
                                 name="is_active"
+                                className="bottom-1 relative"
                                 checked={form.is_active}
                                 onChange={handleChange}
                             />
@@ -577,52 +579,52 @@ export default function ManagementForm({ user, onLogout }: Props) {
                 {/* TABLE */}
                 <div className="page-surface p-3 sm:p-4">
                     <div className="table-wrap">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="border-b">
-                                <th className="text-center py-2 w-40">รูป</th>
-                                <th className="text-left py-2">ชื่อ</th>
-                                <th className="text-left py-2">ตำแหน่ง</th>
-                                <th className="text-center py-2">ฝ่าย</th>
-                                <th className="text-center py-2">ลำดับ</th>
-                                <th className="text-center py-2 w-24">จัดการ</th>
-                            </tr>
-                        </thead>
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="border-b">
+                                    <th className="text-center py-2 w-40">รูป</th>
+                                    <th className="text-left py-2">ชื่อ</th>
+                                    <th className="text-left py-2">ตำแหน่ง</th>
+                                    <th className="text-center py-2">ฝ่าย</th>
+                                    <th className="text-center py-2">ลำดับ</th>
+                                    <th className="text-center py-2 w-24">จัดการ</th>
+                                </tr>
+                            </thead>
 
-                        <DndContext
-                            collisionDetection={closestCenter}
-                            onDragEnd={handleDepartmentDragEnd}
-                        >
-                            <SortableContext
-                                items={grouped.map((group) => group.id)}
-                                strategy={verticalListSortingStrategy}
+                            <DndContext
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDepartmentDragEnd}
                             >
-                                {grouped.map((group) => (
-                                    <SortableDepartmentSection
-                                        key={group.id}
-                                        id={group.id}
-                                        disabled={!group.sortable}
-                                    >
-                                        {({ attributes, listeners, setActivatorNodeRef }: any) => (
-                                            <>
-                                                {/* 🔥 หัวข้อฝ่าย */}
-                                                <tr>
-                                                    <td colSpan={6} className="font-bold bg-gray-100 text-left px-5 py-2">
-                                                        <div className="flex items-center gap-3">
-                                                            {group.sortable && (
-                                                                <button
-                                                                    type="button"
-                                                                    ref={setActivatorNodeRef}
-                                                                    {...attributes}
-                                                                    {...listeners}
-                                                                    className="cursor-grab active:cursor-grabbing text-gray-500"
-                                                                    title="ลากเพื่อจัดลำดับฝ่าย"
-                                                                >
-                                                                    ☰
-                                                                </button>
-                                                            )}
-                                                            <span className="flex-1">{group.name}</span>
-                                                            {group.departmentId && (
+                                <SortableContext
+                                    items={grouped.map((group) => group.id)}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    {grouped.map((group) => (
+                                        <SortableDepartmentSection
+                                            key={group.id}
+                                            id={group.id}
+                                            disabled={!group.sortable}
+                                        >
+                                            {({ attributes, listeners, setActivatorNodeRef }: any) => (
+                                                <>
+                                                    {/* 🔥 หัวข้อฝ่าย */}
+                                                    <tr>
+                                                        <td colSpan={6} className="font-bold bg-gray-100 text-left px-5 py-2">
+                                                            <div className="flex items-center gap-3">
+                                                                {group.sortable && (
+                                                                    <button
+                                                                        type="button"
+                                                                        ref={setActivatorNodeRef}
+                                                                        {...attributes}
+                                                                        {...listeners}
+                                                                        className="cursor-grab active:cursor-grabbing text-gray-500"
+                                                                        title="ลากเพื่อจัดลำดับฝ่าย"
+                                                                    >
+                                                                        ☰
+                                                                    </button>
+                                                                )}
+                                                                <span className="flex-1">{group.name}</span>
+                                                                {/* {group.departmentId && (
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => openDeleteDepartment(group.departmentId!)}
@@ -631,83 +633,85 @@ export default function ManagementForm({ user, onLogout }: Props) {
                                                                 >
                                                                     <Icons.TrashAlt />
                                                                 </button>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                                            )} */}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
 
-                                                {/* 🔥 รายการในฝ่าย */}
-                                                <DndContext
-                                                    collisionDetection={closestCenter}
-                                                    onDragEnd={(event) => handleExecutiveDragEnd(event, group)}
-                                                >
-                                                    <SortableContext
-                                                        items={group.items.map((item) => `executive-${item.id}`)}
-                                                        strategy={verticalListSortingStrategy}
+                                                    {/* 🔥 รายการในฝ่าย */}
+                                                    <DndContext
+                                                        collisionDetection={closestCenter}
+                                                        onDragEnd={(event) => handleExecutiveDragEnd(event, group)}
                                                     >
-                                                        {group.items.map((item: any) => (
-                                                            <SortableExecutiveRow key={item.id} id={`executive-${item.id}`}>
-                                                                {({ attributes, listeners, setActivatorNodeRef }: any) => (
-                                                                    <>
-                                                                        <td className="text-center">
-                                                                            <div className="flex items-center justify-center gap-3">
-                                                                                <button
-                                                                                    type="button"
-                                                                                    ref={setActivatorNodeRef}
-                                                                                    {...attributes}
-                                                                                    {...listeners}
-                                                                                    className="cursor-grab active:cursor-grabbing text-gray-400"
-                                                                                    title="ลากเพื่อจัดลำดับรายการ"
-                                                                                >
-                                                                                    ☰
-                                                                                </button>
-                                                                                <img
-                                                                                    src={`http://localhost:8000/storage/${item.image_path}`}
-                                                                                    className="w-16 h-20 object-cover rounded"
-                                                                                />
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="text-left">{item.name_th}</td>
-                                                                        <td className="text-left">{item.position_th}</td>
-                                                                        <td className="text-center">{item.department?.name_th}</td>
-                                                                        <td className="text-center">{item.order_no}</td>
-                                                                        <td className="align-middle">
-                                                                            <div className="flex items-center justify-center gap-2">
-                                                                                <button
-                                                                                    onClick={() => handleEdit(item)}
-                                                                                    className="text-yellow-500"
-                                                                                >
-                                                                                    <Icons.Edit />
-                                                                                </button>
-                                                                                <span>|</span>
-                                                                                <button
-                                                                                    onClick={() => setDeleteExecutiveId(item.id!)}
-                                                                                    className="text-red-600"
-                                                                                >
-                                                                                    <Icons.TrashAlt />
-                                                                                </button>
-                                                                            </div>
-                                                                        </td>
-                                                                    </>
-                                                                )}
-                                                            </SortableExecutiveRow>
-                                                        ))}
-                                                    </SortableContext>
-                                                </DndContext>
-                                            </>
-                                        )}
-                                    </SortableDepartmentSection>
-                                ))}
-                            </SortableContext>
-                        </DndContext>
-                    </table>
+                                                        <SortableContext
+                                                            items={group.items.map((item) => `executive-${item.id}`)}
+                                                            strategy={verticalListSortingStrategy}
+                                                        >
+                                                            {group.items.map((item: any) => (
+                                                                <SortableExecutiveRow key={item.id} id={`executive-${item.id}`}>
+                                                                    {({ attributes, listeners, setActivatorNodeRef }: any) => (
+                                                                        <>
+                                                                            <td className="text-center">
+                                                                                <div className="flex items-center justify-center gap-3">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        ref={setActivatorNodeRef}
+                                                                                        {...attributes}
+                                                                                        {...listeners}
+                                                                                        className="cursor-grab active:cursor-grabbing text-gray-400"
+                                                                                        title="ลากเพื่อจัดลำดับรายการ"
+                                                                                    >
+                                                                                        ☰
+                                                                                    </button>
+                                                                                    <img
+                                                                                        src={`http://localhost:8000/storage/${item.image_path}`}
+                                                                                        className="w-16 h-20 object-cover rounded"
+                                                                                    />
+                                                                                </div>
+                                                                            </td>
+                                                                            <td className="text-left">{item.name_th}</td>
+                                                                            <td className="text-left">{item.position_th}</td>
+                                                                            <td className="text-center">{item.department?.name_th}</td>
+                                                                            <td className="text-center">{item.order_no}</td>
+                                                                            <td className="align-middle">
+                                                                                <div className="flex items-center justify-center gap-2">
+                                                                                    <button
+                                                                                        onClick={() => handleEdit(item)}
+                                                                                        className="text-yellow-500"
+                                                                                    >
+                                                                                        <Icons.Edit />
+                                                                                    </button>
+                                                                                    <span>|</span>
+                                                                                    <button
+                                                                                        onClick={() => setDeleteExecutiveId(item.id!)}
+                                                                                        className="text-red-600"
+                                                                                    >
+                                                                                        <Icons.TrashAlt />
+                                                                                    </button>
+                                                                                </div>
+                                                                            </td>
+                                                                        </>
+                                                                    )}
+                                                                </SortableExecutiveRow>
+                                                            ))}
+                                                        </SortableContext>
+                                                    </DndContext>
+                                                </>
+                                            )}
+                                        </SortableDepartmentSection>
+                                    ))}
+                                </SortableContext>
+                            </DndContext>
+                        </table>
                     </div>
                 </div>
             </div>
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            {showModal && createPortal((
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
                     <div className="page-surface max-h-[90vh] w-[calc(100%-2rem)] max-w-md overflow-y-auto p-5 sm:p-6">
-                        <h2 className="text-lg font-bold mb-4">จัดการฝ่าย</h2>
+                        <div className="mb-5 border-b border-slate-100 pb-4 pr-10">
+                            <h2 className="mt-1 text-xl font-bold text-slate-950">จัดการฝ่าย</h2>
+                        </div>
 
                         {/* เพิ่ม */}
                         <div className="flex gap-2 mb-4">
@@ -850,12 +854,12 @@ export default function ManagementForm({ user, onLogout }: Props) {
                         </div>
                     </div>
                 </div>
-            )
+            ), document.body)
             }
             {
-                deleteIndex !== null && (
-                    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[60]">
-                        <div className="page-surface w-[calc(100%-2rem)] max-w-sm p-6">
+                deleteIndex !== null && createPortal((
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+                        <div className="page-surface max-h-[90vh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto p-6">
                             <h2 className="text-lg font-bold mb-4">ยืนยันการลบ</h2>
 
                             <p className="mb-4">
@@ -882,12 +886,12 @@ export default function ManagementForm({ user, onLogout }: Props) {
                             </div>
                         </div>
                     </div>
-                )
+                ), document.body)
             }
             {
-                deletingExecutive && (
-                    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[60]">
-                        <div className="page-surface w-[calc(100%-2rem)] max-w-sm p-6">
+                deletingExecutive && createPortal((
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+                        <div className="page-surface max-h-[90vh] w-[calc(100%-2rem)] max-w-sm overflow-y-auto p-6">
                             <h2 className="text-lg font-bold mb-4">ยืนยันการลบ</h2>
 
                             <p className="mb-4">
@@ -915,7 +919,7 @@ export default function ManagementForm({ user, onLogout }: Props) {
                             </div>
                         </div>
                     </div>
-                )
+                ), document.body)
             }
         </AdminLayout >
     );
