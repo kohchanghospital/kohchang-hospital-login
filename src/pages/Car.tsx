@@ -1,256 +1,75 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import AdminLayout from "../layouts/Layout";
 import { Icons } from "../icons/Icons";
 import api from "../services/api";
-import CarModal from "../components/CarModal";
-// import { TablePageSkeleton, TableRowsSkeleton } from "../components/SkeletonScreens";
-
+import CarModal, { type VehicleScheduleRecord } from "../components/CarModal";
+import { TablePageSkeleton } from "../components/SkeletonScreens";
 
 type User = { id: number; name: string; email: string };
-
-type Car = {
-    id: number;
-    date: Date;
-    startTime: Date;
-    endTime: Date;
-    title: string;
-    driver: string;
-    licensePlate: string;
-    description: string[];
-    note: string;
-    created_at: string;
-};
-
-type Meta = {
-    current_page: number;
-    last_page: number;
-    total: number;
-};
-
+type Meta = { current_page: number; last_page: number; total: number };
 type Props = { user: User; onLogout: () => void };
 
+const thaiDate = (date: string) => {
+    const [year, month, day] = date.slice(0, 10).split("-").map(Number);
+    return new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" }).format(new Date(year, month - 1, day));
+};
+const timeRange = (item: VehicleScheduleRecord) => {
+    const start = item.start_time?.slice(0, 5); const end = item.end_time?.slice(0, 5);
+    return start && end ? `${start} - ${end}` : start ?? end ?? "ตลอดวัน";
+};
+
 export default function Car({ user, onLogout }: Props) {
-
-    const [showModal, setShowModal] = useState(false);
-    const [editingItem, setEditingItem] = useState<Car | null>(null);
-
-    const [items, setItems] = useState<Car[]>([]);
+    const [showCreate, setShowCreate] = useState(false);
+    const [editing, setEditing] = useState<VehicleScheduleRecord | null>(null);
+    const [viewing, setViewing] = useState<VehicleScheduleRecord | null>(null);
+    const [items, setItems] = useState<VehicleScheduleRecord[]>([]);
     const [loading, setLoading] = useState(true);
-    const [typesLoaded, setTypesLoaded] = useState(false);
-    const [itemsLoaded, setItemsLoaded] = useState(false);
-
-    const [type, setType] = useState("");
     const [keyword, setKeyword] = useState("");
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
-
     const [meta, setMeta] = useState<Meta | null>(null);
 
-    // 🔥 โหลดรายการกิจกรรมจาก API
-    // const loadData = async () => {
-    //     setLoading(true);
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await api.get("/api/vehicle-schedules", { params: { page, per_page: perPage, q: keyword || undefined } });
+            setItems(response.data.data);
+            setMeta({ current_page: response.data.current_page, last_page: response.data.last_page, total: response.data.total });
+        } catch { toast.error("โหลดข้อมูลแผนการใช้รถยนต์ไม่สำเร็จ"); }
+        finally { setLoading(false); }
+    }, [keyword, page, perPage]);
 
-    //     const params: any = {
-    //         page,
-    //         per_page: perPage,
-    //     };
+    useEffect(() => { void loadData(); }, [loadData]);
 
-    //     if (type) params.type_id = type;
-    //     if (keyword) params.q = keyword;
+    const remove = async (item: VehicleScheduleRecord) => {
+        if (!window.confirm("ยืนยันการลบรายการใช้รถนี้หรือไม่?")) return;
+        const toastId = toast.loading("กำลังลบรายการ...");
+        try {
+            await api.delete(`/api/vehicle-schedules/${item.id}`);
+            toast.success("ลบรายการใช้รถเรียบร้อย", { id: toastId });
+            if (items.length === 1 && page > 1) setPage((current) => current - 1); else await loadData();
+        } catch { toast.error("ลบรายการใช้รถไม่สำเร็จ", { id: toastId }); }
+    };
 
-    //     try {
-    //         const res = await api.get("/api/activities", { params });
-
-    //         setItems(res.data.data);
-    //         setMeta({
-    //             current_page: res.data.current_page,
-    //             last_page: res.data.last_page,
-    //             total: res.data.total,
-    //         });
-    //     } catch (err) {
-    //         console.error("โหลดกิจกรรมไม่สำเร็จ ‼️", err);
-    //     }
-
-    //     setLoading(false);
-    //     setItemsLoaded(true);
-    // };
-
-    // 🔥 โหลดรายการทุกครั้งที่ filter / page เปลี่ยน
-    // useEffect(() => {
-    //     loadData();
-    // }, [type, page, perPage, keyword]);
-
-    // if (!typesLoaded || !itemsLoaded) {
-    //     return (
-    //         <AdminLayout user={user} onLogout={onLogout}>
-    //             <TablePageSkeleton columns={6} filters={2} />
-    //         </AdminLayout>
-    //     );
-    // }
+    if (loading && items.length === 0) return <AdminLayout user={user} onLogout={onLogout}><TablePageSkeleton columns={8} filters={1} /></AdminLayout>;
 
     return (
         <AdminLayout user={user} onLogout={onLogout}>
             <div className="page-surface page-pad">
-                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <h2 className="text-xl font-bold text-slate-900">แผนการใช้รถยนต์</h2>
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="btn-primary"
-                    >
-                        + เพิ่มแผนการใช้รถยนต์
-                    </button>
-                    {showModal && (
-                        <CarModal
-                            onClose={() => {
-                                setShowModal(false);
-                            }}
-                            // onSuccess={() => loadData()}
-                        />
-                    )}
-                    {editingItem && (
-                        <CarModal
-                            initialData={editingItem}
-                            onClose={() => {
-                                setEditingItem(null);
-                            }}
-                            // onSuccess={() => loadData()}
-                        />
-                    )}
+                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-xl font-bold text-slate-900">แผนการใช้รถยนต์</h2><p className="mt-1 text-sm text-slate-500">จัดการตารางรถและพนักงานขับรถที่แสดงบนเว็บไซต์</p></div><button onClick={() => setShowCreate(true)} className="btn-primary">+ เพิ่มแผนการใช้รถยนต์</button></div>
+                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><input type="search" placeholder="ค้นหาหัวข้อ..." className="w-full sm:w-72" value={keyword} onChange={(e) => { setKeyword(e.target.value); setPage(1); }} /><select className="w-full sm:w-48" value={perPage} onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}>{[10, 20, 50, 100].map((size) => <option key={size} value={size}>แสดง {size} รายการ</option>)}</select></div>
+                <div className="table-wrap">
+                    <table className="w-full min-w-[1100px] border-collapse"><thead><tr className="border-b"><th className="px-3 py-3 text-center">ลำดับ</th><th className="px-3 py-3 text-left">วันที่</th><th className="px-3 py-3 text-left">เวลา</th><th className="px-3 py-3 text-left">หัวข้อ</th><th className="px-3 py-3 text-left">พนักงานขับรถ</th><th className="px-3 py-3 text-left">ทะเบียนรถ</th><th className="px-3 py-3 text-center">รายละเอียด</th><th className="px-3 py-3 text-center">จัดการ</th></tr></thead>
+                        <tbody>{items.map((item, index) => <tr key={item.id} className="border-b"><td className="px-3 py-3 text-center">{((meta?.current_page ?? 1) - 1) * perPage + index + 1}</td><td className="whitespace-nowrap px-3 py-3">{thaiDate(item.schedule_date)}</td><td className="whitespace-nowrap px-3 py-3">{timeRange(item)}</td><td className="max-w-xs px-3 py-3 font-medium">{item.title}</td><td className="px-3 py-3">{item.driver.name}</td><td className="whitespace-nowrap px-3 py-3">{item.vehicle.registration_number}</td><td className="px-3 py-3 text-center">{item.details.length}</td><td className="px-3 py-3"><div className="flex items-center justify-center gap-1"><button onClick={() => setViewing(item)} className="rounded-lg px-2 py-1 text-primary-700 hover:bg-primary-50">ดู</button><button onClick={() => setEditing(item)} className="icon-button text-amber-500 hover:bg-amber-50" aria-label="แก้ไข"><Icons.Edit /></button><button onClick={() => void remove(item)} className="icon-button text-red-600 hover:bg-red-50" aria-label="ลบ"><Icons.TrashAlt /></button></div></td></tr>)}</tbody>
+                    </table>
+                    {!loading && items.length === 0 && <div className="p-10 text-center text-slate-500">ไม่พบข้อมูลแผนการใช้รถยนต์</div>}
                 </div>
-
-                {/* Controls */}
-                <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    {/* Filter */}
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                        <input
-                            type="text"
-                            placeholder="ค้นหาหัวข้อ..."
-                            className="w-full sm:w-64"
-                            value={keyword}
-                            onChange={(e) => {
-                                setKeyword(e.target.value);
-                                setPage(1);
-                            }}
-                        />
-                    </div>
-
-                    <div>
-                        <select
-                            className="w-full sm:w-48"
-                            value={perPage}
-                            onChange={(e) => {
-                                setPerPage(Number(e.target.value));
-                                setPage(1);
-                            }}
-                        >
-                            <option value={10}>แสดง 10 รายการ</option>
-                            <option value={20}>แสดง 20 รายการ</option>
-                            <option value={50}>แสดง 50 รายการ</option>
-                            <option value={100}>แสดง 100 รายการ</option>
-                            <option value={9999}>แสดงทั้งหมด</option>
-                        </select>
-                    </div>
-                </div>
-
-                {/* Table */}
-                {/* {loading && <TableRowsSkeleton columns={6} rows={5} />} */}
-
-                {!loading && items.length === 0 && (
-                    <div className="text-gray-500 text-center">ไม่พบข้อมูล</div>
-                )}
-
-                {!loading && items.length > 0 && (
-                    <>
-                        <div className="table-wrap">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="border-b">
-                                    <th className="text-center max-w-4">ลำดับ</th>
-                                    <th className="text-left py-2">หัวข้อ</th>
-                                    <th className="text-left py-2">ประเภท</th>
-                                    <th className="text-center py-2">ไฟล์</th>
-                                    <th className="text-center py-2">วันที่</th>
-                                    <th className="text-center py-2 w-24">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {items.map((i, index) => (
-                                    <tr
-                                        key={i.id}
-                                        className="border-b hover:bg-gray-50 transition"
-                                    >
-                                        <td className="text-center py-2">
-                                            {(meta?.current_page! - 1) * perPage + index + 1}
-                                        </td>
-                                        <td className="text-left py-2">{i.title}</td>
-                                        <td className="text-center">
-                                            {new Date(i.created_at).toLocaleDateString("th-TH")}
-                                        </td>
-                                        <td className="text-center py-2 items-center justify-center flex gap-2">
-                                            <button
-                                                onClick={() => setEditingItem(i)}
-                                                className="text-yellow-500 hover:underline"
-                                                title="แก้ไข"
-                                            >
-                                                <Icons.Edit />
-                                            </button>
-                                            |{" "}
-                                            <a
-                                                href={`/activity/deleted/${i.id}`}
-                                                className="text-red-600 hover:underline"
-                                                title="ลบ"
-                                            >
-                                                <Icons.TrashAlt />
-                                            </a>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        </div>
-
-                        {/* Pagination */}
-                        {meta && (
-                            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="text-sm text-gray-500">
-                                    ทั้งหมด {meta.total} รายการ
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    <button
-                                        disabled={meta.current_page === 1}
-                                        onClick={() => setPage(meta.current_page - 1)}
-                                        className="px-3 py-1 border rounded disabled:opacity-50"
-                                    >
-                                        <Icons.ChevronLeft />
-                                    </button>
-                                    {Array.from(
-                                        { length: meta.last_page },
-                                        (_, i) => i + 1
-                                    ).map((p) => (
-                                        <button
-                                            key={p}
-                                            onClick={() => setPage(p)}
-                                            className={`px-3 py-1 border rounded ${p === meta.current_page
-                                                ? "bg-primary-600 text-white"
-                                                : ""
-                                                }`}
-                                        >
-                                            {p}
-                                        </button>
-                                    ))}
-                                    <button
-                                        disabled={meta.current_page === meta.last_page}
-                                        onClick={() => setPage(meta.current_page + 1)}
-                                        className="px-3 py-1 border rounded disabled:opacity-50"
-                                    >
-                                        <Icons.ChevronRight />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </>
-                )}
+                {meta && meta.last_page > 1 && <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div className="text-sm text-slate-500">ทั้งหมด {meta.total} รายการ</div><div className="flex gap-2"><button disabled={meta.current_page === 1} onClick={() => setPage(meta.current_page - 1)} className="icon-button border disabled:opacity-40"><Icons.ChevronLeft /></button>{Array.from({ length: meta.last_page }, (_, i) => i + 1).map((number) => <button key={number} onClick={() => setPage(number)} className={`h-9 min-w-9 rounded-xl border px-2 ${number === meta.current_page ? "border-primary-600 bg-primary-600 text-white" : "border-slate-200"}`}>{number}</button>)}<button disabled={meta.current_page === meta.last_page} onClick={() => setPage(meta.current_page + 1)} className="icon-button border disabled:opacity-40"><Icons.ChevronRight /></button></div></div>}
             </div>
+            {showCreate && <CarModal onClose={() => setShowCreate(false)} onSuccess={() => void loadData()} />}
+            {editing && <CarModal initialData={editing} onClose={() => setEditing(null)} onSuccess={() => void loadData()} />}
+            {viewing && <CarModal initialData={viewing} readOnly onClose={() => setViewing(null)} />}
         </AdminLayout>
     );
 }
