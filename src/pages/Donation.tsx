@@ -175,7 +175,7 @@ export default function Donation({ user, onLogout }: Props) {
     if (loading) {
         return (
             <AdminLayout user={user} onLogout={onLogout}>
-                <EditorPageSkeleton />
+                <EditorPageSkeleton sections={5} variant="form" />
             </AdminLayout>
         );
     }

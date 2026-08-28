@@ -21,12 +21,12 @@ const menuItems = [
     { path: "/announcements", label: "ประกาศ", icon: FaBell },
     { path: "/knowledges", label: "สาระความรู้", icon: FaBookOpen },
     { path: "/car", label: "แผนการใช้รถ", icon: FaCarSide },
-    { path: "/settings", label: "ตั้งค่า", icon: FaCog },
     { path: "/history", label: "ประวัติ", icon: FaScroll },
     { path: "/management", label: "คณะผู้บริหาร", icon: FaUserTie },
     { path: "/vision", label: "วิสัยทัศน์ พันธกิจ", icon: FaBullseye },
     { path: "/donation", label: "สมทบทุน", icon: FaHandHoldingHeart },
     { path: "/organ", label: "บริจาคอวัยวะ", icon: FaHeartbeat },
+    { path: "/settings", label: "ตั้งค่า", icon: FaCog },
 ];
 
 type Props = {

@@ -11,6 +11,7 @@ const routeNameMap: Record<string, string> = {
     calendar: "ปฏิทินกิจกรรม",
     cars: "แผนการใช้รถ",
     settings: "ตั้งค่า",
+    policies: "นโยบายเว็บไซต์",
     history: "ประวัติ",
     management: "คณะผู้บริหาร",
     vision: "วิสัยทัศน์ พันธกิจ",

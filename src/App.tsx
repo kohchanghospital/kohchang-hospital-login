@@ -13,6 +13,8 @@ import Management from "./pages/Management";
 import { Toaster } from "react-hot-toast";
 import { AdminShellSkeleton } from "./components/SkeletonScreens";
 import Car from "./pages/Car";
+import OrganDonation from "./pages/OrganDonation";
+import Setting from "./pages/Setting";
 
 type User = {
   id: number;
@@ -147,10 +149,10 @@ function App() {
         />
 
         <Route
-          path="/setting"
+          path="/settings"
           element={
             isLoggedIn && user ? (
-              <Dashboard user={user} onLogout={handleLogout} />
+              <Setting user={user} onLogout={handleLogout} />
             ) : (
               <Navigate to="/" />
             )
@@ -195,6 +197,17 @@ function App() {
           element={
             isLoggedIn && user ? (
               <Donation user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        <Route
+          path="/organ"
+          element={
+            isLoggedIn && user ? (
+              <OrganDonation user={user} onLogout={handleLogout} />
             ) : (
               <Navigate to="/" />
             )
