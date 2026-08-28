@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 import toast from "react-hot-toast";
-import { FaCheckCircle, FaEdit, FaExternalLinkAlt, FaFileAlt, FaSave, FaTimes } from "react-icons/fa";
+import { FaCheckCircle, FaDesktop, FaEdit, FaExternalLinkAlt, FaFileAlt, FaSave, FaTimes } from "react-icons/fa";
 import AdminLayout from "../layouts/Layout";
 import { EditorPageSkeleton } from "../components/SkeletonScreens";
 import api from "../services/api";
@@ -20,6 +20,8 @@ type Policy = {
     updated_at: string;
     updater: { id: number; name: string; email: string } | null;
 };
+type SiteSettings = { show_mourning_ribbon: boolean };
+type SettingsTab = "policies" | "display";
 
 const publicSiteUrl = (import.meta.env.VITE_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
 const policySlugs: Record<PolicyType, string> = {
@@ -47,17 +49,20 @@ function thaiDate(value: string) {
 }
 
 export default function Setting({ user, onLogout }: Props) {
+    const [activeTab, setActiveTab] = useState<SettingsTab>("policies");
     const [policies, setPolicies] = useState<Policy[]>([]);
+    const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
     const [editing, setEditing] = useState<Policy | null>(null);
     const [savedPolicy, setSavedPolicy] = useState<Policy | null>(null);
     const [language, setLanguage] = useState<"th" | "en">("th");
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState(false);
+    const [settingsLoadError, setSettingsLoadError] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [savingSetting, setSavingSetting] = useState(false);
     const dirty = useMemo(() => Boolean(editing && savedPolicy && JSON.stringify(editing) !== JSON.stringify(savedPolicy)), [editing, savedPolicy]);
 
     const loadPolicies = async () => {
-        setLoading(true);
         setLoadError(false);
         try {
             const response = await api.get("/api/admin/policies");
@@ -65,12 +70,28 @@ export default function Setting({ user, onLogout }: Props) {
         } catch {
             setLoadError(true);
             toast.error("โหลดข้อมูลนโยบายไม่สำเร็จ");
-        } finally {
-            setLoading(false);
         }
     };
 
-    useEffect(() => { void loadPolicies(); }, []);
+    const loadSiteSettings = async () => {
+        setSettingsLoadError(false);
+        try {
+            const response = await api.get("/api/admin/site-settings");
+            setSiteSettings(response.data.data);
+        } catch {
+            setSettingsLoadError(true);
+            toast.error("โหลดการตั้งค่าการแสดงผลไม่สำเร็จ");
+        }
+    };
+
+    useEffect(() => {
+        const loadPage = async () => {
+            setLoading(true);
+            await Promise.all([loadPolicies(), loadSiteSettings()]);
+            setLoading(false);
+        };
+        void loadPage();
+    }, []);
     useEffect(() => {
         const warn = (event: BeforeUnloadEvent) => { if (dirty) event.preventDefault(); };
         window.addEventListener("beforeunload", warn);
@@ -115,6 +136,26 @@ export default function Setting({ user, onLogout }: Props) {
         }
     };
 
+    const toggleMourningRibbon = async () => {
+        if (!siteSettings || savingSetting) return;
+        const previous = siteSettings;
+        const nextValue = !previous.show_mourning_ribbon;
+        setSiteSettings({ ...previous, show_mourning_ribbon: nextValue });
+        setSavingSetting(true);
+        try {
+            const response = await api.put("/api/admin/site-settings", {
+                show_mourning_ribbon: nextValue,
+            });
+            setSiteSettings(response.data.data);
+            toast.success(nextValue ? "เปิดใช้งานโบว์ดำแล้ว" : "ปิดใช้งานโบว์ดำแล้ว");
+        } catch (error) {
+            setSiteSettings(previous);
+            toast.error(apiMessage(error) || "บันทึกการตั้งค่าการแสดงผลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+        } finally {
+            setSavingSetting(false);
+        }
+    };
+
     if (loading) return <AdminLayout user={user} onLogout={onLogout}><EditorPageSkeleton variant="settings" /></AdminLayout>;
 
     return (
@@ -126,14 +167,65 @@ export default function Setting({ user, onLogout }: Props) {
                     <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-600">จัดการข้อมูลและการตั้งค่าของเว็บไซต์โรงพยาบาลเกาะช้าง</p>
                     <div className="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="หมวดการตั้งค่า">
                         <button type="button" className="btn-muted" disabled title="เตรียมไว้สำหรับการตั้งค่าเว็บไซต์ในอนาคต">ข้อมูลทั่วไป</button>
-                        <button type="button" className="btn-primary" role="tab" aria-selected="true"><FaFileAlt /> นโยบายเว็บไซต์</button>
+                        <button type="button" className={activeTab === "policies" ? "btn-primary" : "btn-muted"} role="tab" aria-selected={activeTab === "policies"} onClick={() => setActiveTab("policies")}><FaFileAlt /> นโยบายเว็บไซต์</button>
+                        <button type="button" className={activeTab === "display" ? "btn-primary" : "btn-muted"} role="tab" aria-selected={activeTab === "display"} onClick={() => setActiveTab("display")}><FaDesktop /> การแสดงผลเว็บไซต์</button>
                     </div>
                 </header>
-                {loadError ? <LoadError onRetry={() => void loadPolicies()} /> : editing ? (
+                {activeTab === "display" ? (
+                    settingsLoadError || !siteSettings
+                        ? <SettingsLoadError onRetry={() => void loadSiteSettings()} />
+                        : <DisplaySettings settings={siteSettings} saving={savingSetting} onToggle={() => void toggleMourningRibbon()} />
+                ) : loadError ? <LoadError onRetry={() => void loadPolicies()} /> : editing ? (
                     <PolicyEditor policy={editing} language={language} saving={saving} dirty={dirty} onLanguage={setLanguage} onChange={setEditing} onClose={closeEditor} onSave={save} />
                 ) : <PolicyList policies={policies} onEdit={startEditing} />}
             </div>
         </AdminLayout>
+    );
+}
+
+function SettingsLoadError({ onRetry }: { onRetry: () => void }) {
+    return (
+        <div className="page-surface page-pad text-center">
+            <h2 className="font-bold text-slate-900">ไม่สามารถโหลดการตั้งค่าการแสดงผลได้</h2>
+            <p className="mt-2 text-sm text-slate-600">กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง</p>
+            <button type="button" className="btn-primary mt-5" onClick={onRetry}>ลองใหม่</button>
+        </div>
+    );
+}
+
+function DisplaySettings({ settings, saving, onToggle }: { settings: SiteSettings; saving: boolean; onToggle: () => void }) {
+    const enabled = settings.show_mourning_ribbon;
+    return (
+        <section className="page-surface page-pad" aria-labelledby="display-settings-heading">
+            <div className="mb-5">
+                <h2 id="display-settings-heading" className="text-xl font-bold text-slate-950">การแสดงผลเว็บไซต์</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-600">จัดการองค์ประกอบที่แสดงร่วมกันในทุกหน้าของเว็บไซต์สาธารณะ</p>
+            </div>
+            <div className="flex flex-col gap-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                    <h3 className="font-bold text-slate-900">โบว์ดำไว้อาลัย</h3>
+                    <p id="mourning-ribbon-description" className="mt-1 text-sm leading-6 text-slate-600">แสดงสัญลักษณ์โบว์ดำบริเวณมุมขวาบนของเว็บไซต์</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
+                    <span className={`text-sm font-bold ${enabled ? "text-emerald-700" : "text-slate-500"}`} aria-hidden="true">
+                        {saving ? "กำลังบันทึก..." : enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                    </span>
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={enabled}
+                        aria-describedby="mourning-ribbon-description"
+                        aria-label="แสดงโบว์ดำไว้อาลัย"
+                        disabled={saving}
+                        onClick={onToggle}
+                        className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-70 ${enabled ? "bg-emerald-600" : "bg-slate-300"}`}
+                    >
+                        <span className={`inline-block h-6 w-6 rounded-full bg-white shadow transition-transform ${enabled ? "translate-x-6" : "translate-x-0"}`} />
+                    </button>
+                    <span className="w-7 text-xs font-extrabold text-slate-500" aria-hidden="true">{enabled ? "ON" : "OFF"}</span>
+                </div>
+            </div>
+        </section>
     );
 }
 
