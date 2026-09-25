@@ -828,7 +828,7 @@ export default function ManagementForm({ user, onLogout }: Props) {
                                                                 |{" "}
                                                                 {/* ปุ่มลบ */}
                                                                 <button
-                                                                    onClick={() => setDeleteIndex(i)}
+                                                                    onClick={() => openDeleteDepartment(d.id)}
                                                                     className="text-red-500"
                                                                 >
                                                                     <Icons.TrashAlt />

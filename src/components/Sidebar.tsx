@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 
 const menuItems = [
+    { path: "/hero-sliders", label: "จัดการเว็บไซต์ · Hero Slider", icon: FaHospital },
     { path: "/dashboard", label: "Dashboard", icon: FaHome },
     { path: "/activity", label: "ปฏิทินกิจกรรม", icon: FaCalendarAlt },
     { path: "/announcements", label: "ประกาศ", icon: FaBell },

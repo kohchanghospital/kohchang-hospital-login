@@ -16,8 +16,8 @@ body {
   body {
     @apply min-h-screen bg-slate-50 text-slate-800;
     background:
-      radial-gradient(circle at top left, rgba(14, 116, 144, 0.12), transparent 32rem),
-      linear-gradient(135deg, #f8fafc 0%, #eef7f8 48%, #f8fafc 100%);
+      radial-gradient(circle at top left, rgba(109, 40, 217, 0.06), transparent 32rem),
+      linear-gradient(135deg, #f8fafc 0%, #f5f3ff 48%, #f8fafc 100%);
   }
 
   * {
@@ -72,3 +72,11 @@ body {
     @apply w-full overflow-x-auto rounded-2xl border border-slate-100;
   }
 }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+.hero-dialog { margin: auto; width: min(92vw, 560px); max-height: 90dvh; overflow-y: auto; border: 1px solid theme("colors.primary.200"); box-shadow: 0 24px 80px #2e106533; }
+.hero-editor { width: min(94vw, 850px); }
+.hero-dialog::backdrop { background: #1f293780; backdrop-filter: blur(3px); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+input[type="checkbox"] { min-height: 18px; width: 18px; accent-color: theme("colors.primary.600"); }
+:focus-visible { outline: 3px solid theme("colors.primary.500"); outline-offset: 3px; }

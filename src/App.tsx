@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import { fetchMe, logout } from "./services/api";
+import api, { fetchMe, logout } from "./services/api";
 import Activity from "./pages/Activity";
 import AnnouncementList from "./pages/AnnouncementList";
 import History from "./pages/History";
@@ -15,43 +15,51 @@ import { AdminShellSkeleton } from "./components/SkeletonScreens";
 import Car from "./pages/Car";
 import OrganDonation from "./pages/OrganDonation";
 import Setting from "./pages/Setting";
+import Security from "./pages/Security";
+import VerifyTwoFactor from "./pages/VerifyTwoFactor";
+import SetupTwoFactor from "./pages/SetupTwoFactor";
+import HeroSliders from "./pages/HeroSliders";
+import Profile from "./pages/Profile";
 
 type User = {
   id: number;
   name: string;
   email: string;
+  username?: string | null;
 };
 
 function App() {
-  const isInitiallyLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  const [isLoggedIn, setIsLoggedIn] = useState(isInitiallyLoggedIn);
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [checkingAuth, setCheckingAuth] = useState(isInitiallyLoggedIn);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
+    let active = true;
     const checkAuth = async () => {
-      if (!isLoggedIn) {
-        setCheckingAuth(false);
-        return;
-      }
-
-      setCheckingAuth(true);
-
       try {
         const res = await fetchMe();
-        setUser(res.data);
+        if (active) { setUser(res.data); setIsLoggedIn(true); setPendingPath(null); }
       } catch {
-        localStorage.removeItem("isLoggedIn");
-        setIsLoggedIn(false);
-        setUser(null);
-      } finally {
-        setCheckingAuth(false);
-      }
+        try {
+          const res = await api.get("/two-factor/challenge");
+          if (active) { setUser(null); setIsLoggedIn(false); setPendingPath(res.data.next || null); }
+        } catch {
+          if (active) { setUser(null); setIsLoggedIn(false); setPendingPath(null); }
+        }
+      } finally { if (active) setCheckingAuth(false); }
     };
+    void checkAuth();
+    return () => { active = false; };
+  }, []);
 
-    checkAuth();
-  }, [isLoggedIn]);
-
+  const handleVerified = (authenticatedUser: User) => {
+    setUser(authenticatedUser);
+    setIsLoggedIn(true);
+    setPendingPath(null);
+    navigate("/dashboard", { replace: true });
+  };
   const handleLogout = async () => {
     try {
       await logout();
@@ -59,9 +67,11 @@ function App() {
       // Logout should still clear local session state if the server is unavailable.
     }
 
-    localStorage.removeItem("isLoggedIn");
+
     setIsLoggedIn(false);
     setUser(null);
+    setPendingPath(null);
+    navigate("/", { replace: true });
   };
 
   if (checkingAuth) {
@@ -87,11 +97,15 @@ function App() {
             isLoggedIn ? (
               <Navigate to="/dashboard" />
             ) : (
-              <Login onLoginSuccess={() => setIsLoggedIn(true)} />
+              <Login onPending={(next) => { setPendingPath(next); navigate(next); }} />
             )
           }
         />
 
+        <Route path="/login" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login onPending={(next) => { setPendingPath(next); navigate(next); }} />} />
+        <Route path="/2fa/setup" element={<SetupTwoFactor onVerified={handleVerified} />} />
+        <Route path="/2fa/verify" element={<VerifyTwoFactor onVerified={handleVerified} />} />
+        <Route path="/2fa/recovery" element={<VerifyTwoFactor onVerified={handleVerified} recovery />} />
         {/* Protected Routes */}
         <Route
           path="/dashboard"
@@ -99,7 +113,7 @@ function App() {
             isLoggedIn && user ? (
               <Dashboard user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
@@ -110,7 +124,7 @@ function App() {
             isLoggedIn && user ? (
               <Activity user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
@@ -121,7 +135,7 @@ function App() {
             isLoggedIn && user ? (
               <AnnouncementList user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
@@ -132,7 +146,7 @@ function App() {
             isLoggedIn && user ? (
               <Knowledge user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
@@ -143,7 +157,7 @@ function App() {
             isLoggedIn && user ? (
               <Car user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
@@ -154,10 +168,13 @@ function App() {
             isLoggedIn && user ? (
               <Setting user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
+        <Route path="/security" element={<Navigate to="/profile/security" replace />} />
+        <Route path="/profile" element={isLoggedIn && user ? <Profile user={user} onLogout={handleLogout} onUpdated={setUser} /> : <Navigate to={pendingPath || "/"} />} />
+        <Route path="/profile/security" element={isLoggedIn && user ? <Security user={user} onLogout={handleLogout} /> : <Navigate to={pendingPath || "/"} />} />
 
         <Route
           path="/history"
@@ -165,7 +182,7 @@ function App() {
             isLoggedIn && user ? (
               <History user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
@@ -176,7 +193,7 @@ function App() {
             isLoggedIn && user ? (
               <Management user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
@@ -187,7 +204,7 @@ function App() {
             isLoggedIn && user ? (
               <Vision user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
@@ -198,7 +215,7 @@ function App() {
             isLoggedIn && user ? (
               <Donation user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
@@ -209,13 +226,14 @@ function App() {
             isLoggedIn && user ? (
               <OrganDonation user={user} onLogout={handleLogout} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to={pendingPath || "/"} />
             )
           }
         />
 
+        <Route path="/hero-sliders" element={isLoggedIn && user ? <HeroSliders user={user} onLogout={handleLogout} /> : <Navigate to={pendingPath || "/"} />} />
         {/* fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to={pendingPath || "/"} />} />
       </Routes>
     </>
   );

@@ -16,6 +16,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@tinymce/tinymce-react": "^6.3.0",
     "axios": "^1.13.2",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.78.0",

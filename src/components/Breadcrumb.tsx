@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const routeNameMap: Record<string, string> = {
     admin: "Admin",
+    "hero-sliders": "Hero Slider",
     dashboard: "Dashboard",
     news: "ข่าวสาร",
     upload: "อัปโหลด",

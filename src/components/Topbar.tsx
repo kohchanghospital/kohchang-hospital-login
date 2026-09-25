@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { FaBars, FaChevronDown, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import Breadcrumb from "./Breadcrumb";
+import { Link } from "react-router-dom";
 
 type User = {
     id: number;
     name: string;
     email: string;
+    username?: string;
 };
 
 type Props = {
@@ -64,7 +66,7 @@ export default function Topbar({ user, onLogout, onMenuClick }: Props) {
 
                     <div className="hidden text-left sm:block">
                         <div className="max-w-40 truncate text-sm font-semibold text-slate-800">
-                            {user?.name || "ผู้ใช้"}
+                            {user?.username || user?.name || "ผู้ใช้"}
                         </div>
                         <div className="max-w-44 truncate text-xs text-slate-500">
                             {user?.email || ""}
@@ -78,10 +80,10 @@ export default function Topbar({ user, onLogout, onMenuClick }: Props) {
 
                 {openProfile && (
                     <div className="absolute right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-lift animate-fade-up">
-                        <button className="flex w-full items-center gap-3 px-4 py-3 text-left text-slate-700 transition hover:bg-slate-50">
+                        <Link to="/profile" onClick={() => setOpenProfile(false)} className="flex w-full items-center gap-3 px-4 py-3 text-left text-slate-700 transition hover:bg-slate-50">
                             <FaUserCircle className="text-primary-600" />
                             โปรไฟล์
-                        </button>
+                        </Link>
                         <button
                             onClick={onLogout}
                             className="flex w-full items-center gap-3 border-t border-slate-100 px-4 py-3 text-left text-red-600 transition hover:bg-red-50"
